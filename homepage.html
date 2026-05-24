@@ -976,16 +976,6 @@
         // Modal functions
         function openChatModal() {
             document.getElementById('chatModal').classList.add('active');
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = '';
-
-            if (currentUser.isFirstTime) {
-                addErikaMessage(`Hi ${currentUser.nickname}! I'm Erika, your smart campus assistant. I can help you organize your classes, deadlines, and tasks.\n\nHere's what I can do:\n• Upload and analyze your course syllabi\n• Extract important deadlines and meetings\n• Create a personalized study schedule\n• Suggest work strategies\n• Answer questions about your coursework\n\nLet's get started! You can upload files or just tell me about your classes.`);
-                currentUser.isFirstTime = false;
-                saveUserData();
-            } else {
-                addErikaMessage(`Welcome back, ${currentUser.nickname}! How can I help you today? You can upload files, ask about your schedule, or let me know if you need help organizing your work.`);
-            }
         }
 
         function closeChatModal() {
@@ -998,10 +988,6 @@
 
         function closeAddClassModal() {
             document.getElementById('addClassModal').classList.remove('active');
-            document.getElementById('className').value = '';
-            document.getElementById('classCode').value = '';
-            document.getElementById('classSchedule').value = '';
-            document.getElementById('classDeadlines').value = '';
         }
 
         function openAddTaskModal() {
@@ -1010,72 +996,67 @@
 
         function closeAddTaskModal() {
             document.getElementById('addTaskModal').classList.remove('active');
-            document.getElementById('taskName').value = '';
-            document.getElementById('taskClass').value = '';
-            document.getElementById('taskDueDate').value = '';
-            document.getElementById('taskDescription').value = '';
         }
 
         function handleAddClass(event) {
             event.preventDefault();
-            
+            const className = document.getElementById('className').value;
+            const classCode = document.getElementById('classCode').value;
+            const classColor = document.getElementById('classColor').value;
+            const classSchedule = document.getElementById('classSchedule').value;
+            const classDeadlines = document.getElementById('classDeadlines').value;
+
+            if (!currentUser.classes) {
+                currentUser.classes = [];
+            }
+
             const newClass = {
                 id: `class_${Date.now()}`,
-                name: document.getElementById('className').value,
-                code: document.getElementById('classCode').value,
-                color: document.getElementById('classColor').value,
-                schedule: document.getElementById('classSchedule').value,
-                deadlines: parseDeadlines(document.getElementById('classDeadlines').value),
-                meetings: []
+                name: className,
+                code: classCode,
+                color: classColor,
+                schedule: classSchedule,
+                deadlines: classDeadlines.split('\n').filter(d => d.trim()).map(d => ({
+                    title: d.trim(),
+                    date: new Date().toISOString()
+                }))
             };
 
-            if (!currentUser.classes) currentUser.classes = [];
             currentUser.classes.push(newClass);
             saveUserData();
-
-            closeAddClassModal();
-            displayStats();
             displayClasses();
             populateClassSelect();
-            displayUpcomingDeadlines();
-
+            closeAddClassModal();
             alert('Class added successfully!');
         }
 
         function handleAddTask(event) {
             event.preventDefault();
-            
+            const taskName = document.getElementById('taskName').value;
+            const taskClass = document.getElementById('taskClass').value;
+            const taskDueDate = document.getElementById('taskDueDate').value;
+            const taskDescription = document.getElementById('taskDescription').value;
+
+            if (!currentUser.tasks) {
+                currentUser.tasks = [];
+            }
+
             const newTask = {
                 id: `task_${Date.now()}`,
-                name: document.getElementById('taskName').value,
-                classId: document.getElementById('taskClass').value,
-                dueDate: document.getElementById('taskDueDate').value,
-                description: document.getElementById('taskDescription').value,
+                name: taskName,
+                classId: taskClass,
+                dueDate: taskDueDate,
+                description: taskDescription,
                 completed: false,
                 createdAt: new Date().toISOString()
             };
 
-            if (!currentUser.tasks) currentUser.tasks = [];
             currentUser.tasks.push(newTask);
             saveUserData();
-
-            closeAddTaskModal();
-            displayStats();
             displayPendingTasks();
-            displaySummary();
-            displayUpcomingDeadlines();
-
+            displayStats();
+            closeAddTaskModal();
             alert('Task added successfully!');
-        }
-
-        function parseDeadlines(text) {
-            const lines = text.split('\n');
-            return lines.filter(l => l.trim()).map((line, i) => ({
-                id: `deadline_${Date.now()}_${i}`,
-                title: line.trim(),
-                date: new Date().toISOString(),
-                type: 'assignment'
-            }));
         }
 
         function handleChatKeypress(event) {
@@ -1087,115 +1068,59 @@
         function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
-
+            
             if (!message) return;
 
-            addUserMessage(message);
+            // Add message to chat
+            addChatMessage(message, 'user');
             input.value = '';
 
-            // Simulate Erika response with AI-like behavior
+            // Simulate response
             setTimeout(() => {
-                const response = generateSmartResponse(message);
-                addErikaMessage(response);
-            }, 800);
+                addChatMessage('Thanks for your message! I\'m here to help you manage your academic workload. How can I assist you?', 'erika');
+            }, 500);
+        }
+
+        function addChatMessage(content, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            if (chatMessages.children.length === 1 && chatMessages.children[0].textContent.includes('Welcome')) {
+                chatMessages.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'user' : 'erika'}`;
+            messageDiv.innerHTML = `<div class="message-bubble">${content}</div>`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                const fileName = file.name;
-                addUserMessage(`Uploaded: ${fileName}`);
-                
-                setTimeout(() => {
-                    addErikaMessage(`I've received your file: ${fileName}\n\nI'm analyzing it now. Please note: File parsing and extraction features require backend integration with document processing services.\n\nFor now, you can:\n• Manually enter deadlines from the file\n• Use "Add Class" to input course information\n• Tell me about important dates and I'll help organize them`);
-                }, 1000);
+                alert(`File uploaded: ${file.name}`);
             }
-        }
-
-        function generateSmartResponse(userMessage) {
-            const msg = userMessage.toLowerCase();
-
-            if (msg.includes('deadline') || msg.includes('due')) {
-                const deadlineCount = (currentUser.classes || []).reduce((sum, c) => sum + (c.deadlines ? c.deadlines.length : 0), 0);
-                return `You have ${deadlineCount} deadline(s) currently. Would you like me to:\n• Show you a prioritized list\n• Help you create a study schedule\n• Remind you about upcoming deadlines`;
-            }
-
-            if (msg.includes('strategy') || msg.includes('schedule') || msg.includes('plan')) {
-                return `Here's my recommended strategy:\n1. Prioritize tasks by due date\n2. Break large projects into smaller milestones\n3. Set daily goals for each subject\n4. Take regular breaks\n5. Review and adjust as needed\n\nWould you like me to create a detailed schedule for you?`;
-            }
-
-            if (msg.includes('help') || msg.includes('what can')) {
-                return `I can help you with:\n• Organizing your classes and deadlines\n• Creating study schedules\n• Tracking your tasks\n• Analyzing your workload\n• Suggesting time management strategies\n\nWhat would you like to focus on?`;
-            }
-
-            if (msg.includes('summary') || msg.includes('progress')) {
-                const tasks = currentUser.tasks || [];
-                const completed = tasks.filter(t => t.completed).length;
-                const pending = tasks.filter(t => !t.completed).length;
-                return `Your current progress:\n• Classes: ${currentUser.classes ? currentUser.classes.length : 0}\n• Completed Tasks: ${completed}\n• Pending Tasks: ${pending}\n\nKeep up the great work!`;
-            }
-
-            return `That's great! I'm here to help you stay organized. You can:\n• Ask about your schedule\n• Upload your syllabi\n• Get study tips\n• Create task lists\n\nWhat would help you most right now?`;
-        }
-
-        function addUserMessage(message) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message user';
-            messageDiv.innerHTML = `<div class="message-bubble">${escapeHtml(message)}</div>`;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function addErikaMessage(message) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message erika';
-            messageDiv.innerHTML = `<div class="message-bubble">${message.replace(/\n/g, '<br>')}</div>`;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function saveUserData() {
             const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
             const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
-            
             if (userIndex !== -1) {
                 allUsers[userIndex] = currentUser;
-            } else {
-                allUsers.push(currentUser);
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
             }
-
-            localStorage.setItem('allUsers', JSON.stringify(allUsers));
         }
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'landingpage.html';
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const chatModal = document.getElementById('chatModal');
-            const classModal = document.getElementById('addClassModal');
-            const taskModal = document.getElementById('addTaskModal');
-
-            if (event.target == chatModal) {
-                chatModal.classList.remove('active');
-            }
-            if (event.target == classModal) {
-                classModal.classList.remove('active');
-            }
-            if (event.target == taskModal) {
-                taskModal.classList.remove('active');
-            }
+            window.location.href = 'signin.html';
         }
     </script>
+
+    <!-- Chatbot Widget -->
+    <script>
+        window.CHATBOT_API_URL = 'https://erika-chatbot-api.onrender.com/api';
+    </script>
+    <script src="chatbot/frontend/chatbot-widget.js"></script>
 </body>
 </html>

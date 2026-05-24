@@ -933,7 +933,6 @@
             document.getElementById('className').value = '';
             document.getElementById('classCode').value = '';
             document.getElementById('classColor').value = '#824531';
-            document.getElementById('classSchedule').value = '';
             document.getElementById('classInstructor').value = '';
             document.getElementById('addClassModal').classList.add('active');
             document.querySelectorAll('.schedule-day').forEach(day => {
@@ -951,40 +950,37 @@
 
         function handleSaveClass(event) {
             event.preventDefault();
-            
+        
             const name = document.getElementById('className').value.trim();
             const code = document.getElementById('classCode').value.trim();
             const color = document.getElementById('classColor').value;
+        
             const selectedDays = [...document.querySelectorAll('.schedule-day:checked')]
                 .map(day => day.value);
-            
+        
             const startTime = document.getElementById('classStartTime').value;
             const endTime = document.getElementById('classEndTime').value;
-            
+        
             const schedule = {
                 days: selectedDays,
                 startTime,
                 endTime
             };
+        
             const instructor = document.getElementById('classInstructor').value.trim();
+        
             const errorDiv = document.getElementById('classError');
-
             errorDiv.classList.remove('show');
-
-            if (!name) {
-                errorDiv.textContent = 'Please enter a class name.';
+        
+            if (!name || !code) {
+                errorDiv.textContent = 'Please fill in all required fields.';
                 errorDiv.classList.add('show');
                 return;
             }
-
-            if (!code) {
-                errorDiv.textContent = 'Please enter a class code.';
-                errorDiv.classList.add('show');
-                return;
-            }
-
+        
             if (editingClassId) {
                 const classIndex = currentUser.classes.findIndex(c => c.id === editingClassId);
+        
                 if (classIndex !== -1) {
                     currentUser.classes[classIndex] = {
                         ...currentUser.classes[classIndex],
@@ -997,24 +993,26 @@
                 }
             } else {
                 const newClass = {
-                    id: `class_${Date.now()}`,
+                    id: Date.now().toString(),
                     name,
                     code,
                     color,
                     schedule,
                     instructor,
-                    deadlines: [],
-                    meetings: []
+                    deadlines: []
                 };
+        
                 currentUser.classes.push(newClass);
             }
-
+        
             saveUserData();
-            closeAddClassModal();
+        
             displayStats();
+            displaySummary();
             displayClasses();
-            displayUpcomingDeadlines();
             populateClassSelect();
+        
+            closeAddClassModal();
         }
 
         function editClass(classId) {

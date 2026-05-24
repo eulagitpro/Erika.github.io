@@ -495,6 +495,28 @@
             display: none;
         }
 
+        .schedule-days-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+        
+        .schedule-day-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #4a2a1f;
+        }
+        
+        .schedule-day-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
         .error-message.show {
             display: block;
         }
@@ -645,7 +667,42 @@
                     <div class="form-group">
                         <label>Schedule</label>
                     
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                        <div class="schedule-days-list">
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Monday">
+                                <span>Monday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Tuesday">
+                                <span>Tuesday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Wednesday">
+                                <span>Wednesday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Thursday">
+                                <span>Thursday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Friday">
+                                <span>Friday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Saturday">
+                                <span>Saturday</span>
+                            </label>
+                        
+                            <label class="schedule-day-item">
+                                <input type="checkbox" class="schedule-day" value="Sunday">
+                                <span>Sunday</span>
+                            </label>
+                        </div>
                             <label><input type="checkbox" class="schedule-day" value="Monday"> Monday</label>
                             <label><input type="checkbox" class="schedule-day" value="Tuesday"> Tuesday</label>
                             <label><input type="checkbox" class="schedule-day" value="Wednesday"> Wednesday</label>

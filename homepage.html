@@ -979,7 +979,9 @@
             }
         
             if (editingClassId) {
-                const classIndex = currentUser.classes.findIndex(c => c.id === editingClassId);
+                const classIndex = currentUser.classes.findIndex(
+                    c => c.id === editingClassId
+                );
         
                 if (classIndex !== -1) {
                     currentUser.classes[classIndex] = {
@@ -1016,26 +1018,32 @@
         }
 
         function editClass(classId) {
-            editingClassId = classId;
             const cls = currentUser.classes.find(c => c.id === classId);
-            
-            if (cls) {
-                document.getElementById('classModalTitle').textContent = 'Edit Class';
-                document.getElementById('className').value = cls.name;
-                document.getElementById('classCode').value = cls.code;
-                document.getElementById('classColor').value = cls.color || '#824531';
-                document.querySelectorAll('.schedule-day').forEach(day => {
-                    day.checked = cls.schedule?.days?.includes(day.value) || false;
-                });
-                
-                document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
-                document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
-                document.getElementById('classInstructor').value = cls.instructor || '';
-                document.getElementById('classError').classList.remove('show');
-                document.getElementById('addClassModal').classList.add('active');
-            }
+        
+            if (!cls) return;
+        
+            editingClassId = classId;
+        
+            document.getElementById('classModalTitle').textContent = 'Edit Class';
+        
+            document.getElementById('className').value = cls.name || '';
+            document.getElementById('classCode').value = cls.code || '';
+            document.getElementById('classColor').value = cls.color || '#824531';
+            document.getElementById('classInstructor').value = cls.instructor || '';
+        
+            document.querySelectorAll('.schedule-day').forEach(day => {
+                day.checked = cls.schedule?.days?.includes(day.value) || false;
+            });
+        
+            document.getElementById('classStartTime').value =
+                cls.schedule?.startTime || '';
+        
+            document.getElementById('classEndTime').value =
+                cls.schedule?.endTime || '';
+        
+            document.getElementById('addClassModal').classList.add('active');
         }
-
+        
         function openAddTaskModal() {
             document.getElementById('taskError').classList.remove('show');
             document.getElementById('taskName').value = '';

@@ -1,0 +1,81 @@
+// users.json
+// This file stores all user information and data
+// Structure: Array of user objects with the following properties:
+// {
+//   id: string (unique identifier),
+//   nickname: string (display name),
+//   email: string (login email),
+//   password: string (hashed - should be encrypted in production),
+//   createdAt: timestamp,
+//   lastLogin: timestamp,
+//   isFirstTime: boolean,
+//   classes: [
+//     {
+//       id: string,
+//       name: string,
+//       syllabus: string (file reference or text),
+//       deadlines: [
+//         {
+//           id: string,
+//           title: string,
+//           dueDate: timestamp,
+//           type: string (assignment, exam, project, etc),
+//           description: string,
+//           priority: string (low, medium, high)
+//         }
+//       ],
+//       meetings: [
+//         {
+//           id: string,
+//           title: string,
+//           dateTime: timestamp,
+//           location: string,
+//           notes: string
+//         }
+//       ]
+//     }
+//   ],
+//   appointments: [
+//     {
+//       id: string,
+//       title: string,
+//       dateTime: timestamp,
+//       location: string,
+//       notes: string
+//     }
+//   ],
+//   chatHistory: [
+//     {
+//       id: string,
+//       timestamp: timestamp,
+//       userMessage: string,
+//       erikaResponse: string,
+//       context: string (type of assistance)
+//     }
+//   ],
+//   workStrategies: [
+//     {
+//       id: string,
+//       createdAt: timestamp,
+//       suggestion: string,
+//       tasks: [string],
+//       estimatedCompletionTime: string
+//     }
+//   ]
+// }
+
+[
+  {
+    "id": "user_001",
+    "nickname": "Sam",
+    "email": "sam@example.com",
+    "password": "hashed_password_here",
+    "createdAt": 1716576000000,
+    "lastLogin": 1716576000000,
+    "isFirstTime": true,
+    "classes": [],
+    "appointments": [],
+    "chatHistory": [],
+    "workStrategies": []
+  }
+]

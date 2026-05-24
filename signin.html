@@ -195,23 +195,17 @@
             transform: translateY(0);
         }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 1.5rem 0;
-            color: #8c8c8c;
+        .error-message {
+            background: #f44336;
+            color: #ffffff;
+            padding: 0.8rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
         }
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #ededed;
-        }
-
-        .divider span {
-            padding: 0 1rem;
+        .error-message.show {
+            display: block;
         }
 
         .signup-link {
@@ -270,6 +264,7 @@
 
         <!-- Sign In Tab -->
         <div id="signin" class="tab-content active">
+            <div class="error-message" id="signinError"></div>
             <form onsubmit="handleSignIn(event)">
                 <div class="form-group">
                     <label for="signin-email">Email Address</label>
@@ -299,7 +294,13 @@
 
         <!-- Create Account Tab -->
         <div id="signup" class="tab-content">
+            <div class="error-message" id="signupError"></div>
             <form onsubmit="handleSignUp(event)">
+                <div class="form-group">
+                    <label for="signup-nickname">Nickname (What Erika will call you)</label>
+                    <input type="text" id="signup-nickname" placeholder="e.g., Sam, Alex, Jordan" required>
+                </div>
+
                 <div class="form-group">
                     <label for="signup-name">Full Name</label>
                     <input type="text" id="signup-name" placeholder="John Doe" required>
@@ -345,6 +346,10 @@
 
             // Add active class to clicked button
             event.target.classList.add('active');
+
+            // Clear error messages
+            document.getElementById('signinError').classList.remove('show');
+            document.getElementById('signupError').classList.remove('show');
         }
 
         function handleSignIn(event) {
@@ -352,27 +357,86 @@
             const email = document.getElementById('signin-email').value;
             const password = document.getElementById('signin-password').value;
             const rememberMe = document.getElementById('remember-me').checked;
+            const errorDiv = document.getElementById('signinError');
 
-            // TODO: Replace with actual authentication API call
-            alert(`Sign in attempt:\nEmail: ${email}\nPassword: ${password}\nRemember me: ${rememberMe}`);
-            console.log('Sign In Data:', { email, password, rememberMe });
+            // Get all users from localStorage
+            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+
+            // Find user with matching email and password
+            const user = allUsers.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                errorDiv.textContent = 'Invalid email or password. Please try again.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Save current user and redirect
+            localStorage.setItem('currentUser', email);
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', email);
+            }
+
+            // Update last login
+            user.lastLogin = new Date().getTime();
+            const userIndex = allUsers.findIndex(u => u.email === email);
+            allUsers[userIndex] = user;
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+            // Redirect to homepage
+            window.location.href = 'homepage.html';
         }
 
         function handleSignUp(event) {
             event.preventDefault();
+            const nickname = document.getElementById('signup-nickname').value;
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const confirm = document.getElementById('signup-confirm').value;
+            const errorDiv = document.getElementById('signupError');
 
             if (password !== confirm) {
-                alert('Passwords do not match!');
+                errorDiv.textContent = 'Passwords do not match!';
+                errorDiv.classList.add('show');
                 return;
             }
 
-            // TODO: Replace with actual authentication API call
-            alert(`Account creation attempt:\nName: ${name}\nEmail: ${email}\nPassword: ${password}`);
-            console.log('Sign Up Data:', { name, email, password });
+            // Get all users from localStorage
+            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+
+            // Check if email already exists
+            if (allUsers.find(u => u.email === email)) {
+                errorDiv.textContent = 'An account with this email already exists.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: `user_${Date.now()}`,
+                nickname: nickname,
+                name: name,
+                email: email,
+                password: password,
+                createdAt: new Date().getTime(),
+                lastLogin: new Date().getTime(),
+                isFirstTime: true,
+                classes: [],
+                appointments: [],
+                chatHistory: [],
+                workStrategies: []
+            };
+
+            // Add user to database
+            allUsers.push(newUser);
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+            // Sign them in automatically
+            localStorage.setItem('currentUser', email);
+
+            // Redirect to homepage
+            window.location.href = 'homepage.html';
         }
 
         function checkPasswordMatch() {
@@ -395,6 +459,14 @@
                 indicator.classList.add('no-match');
             }
         }
+
+        // Auto-populate remembered email if available
+        window.addEventListener('DOMContentLoaded', () => {
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                document.getElementById('signin-email').value = rememberedEmail;
+            }
+        });
     </script>
 </body>
 </html>

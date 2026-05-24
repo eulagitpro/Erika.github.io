@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - Erika</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,10 +15,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #191817;
+            background: #bfd3d8;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,9 +26,13 @@
             padding: 2rem;
         }
 
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Bitter', serif;
+        }
+
         .container {
-            background: white;
-            border-radius: 10px;
+            background: #ffffff;
+            border-radius: 5px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             max-width: 450px;
             width: 100%;
@@ -33,8 +40,8 @@
         }
 
         .auth-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #824531;
+            color: #ffffff;
             padding: 2rem;
             text-align: center;
         }
@@ -48,23 +55,23 @@
             position: absolute;
             top: 1.5rem;
             left: 1.5rem;
-            color: white;
+            color: #ffffff;
             text-decoration: none;
             font-size: 1rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
             padding: 0.5rem 1rem;
             border-radius: 5px;
             transition: background 0.3s;
         }
 
         .back-home:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .tabs {
             display: flex;
-            background: #f5f5f5;
-            border-bottom: 2px solid #e0e0e0;
+            background: #ededed;
+            border-bottom: 2px solid #e5eaeb;
         }
 
         .tab-button {
@@ -75,14 +82,15 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            color: #666;
+            color: #8c8c8c;
             transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
         }
 
         .tab-button.active {
-            color: #667eea;
-            border-bottom: 3px solid #667eea;
-            background: white;
+            color: #824531;
+            border-bottom: 3px solid #824531;
+            background: #ffffff;
         }
 
         .tab-content {
@@ -112,7 +120,7 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #333;
+            color: #191817;
         }
 
         input[type="text"],
@@ -120,18 +128,19 @@
         input[type="password"] {
             width: 100%;
             padding: 0.8rem;
-            border: 1px solid #ddd;
+            border: 1px solid #ededed;
             border-radius: 5px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            font-family: 'Inter', sans-serif;
         }
 
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="password"]:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+            border-color: #824531;
+            box-shadow: 0 0 5px rgba(130, 69, 49, 0.3);
         }
 
         .form-options {
@@ -152,7 +161,7 @@
         }
 
         .forgot-password {
-            color: #667eea;
+            color: #824531;
             text-decoration: none;
             transition: opacity 0.3s;
         }
@@ -164,20 +173,22 @@
         .submit-button {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #824531;
+            color: #ffffff;
             border: none;
             border-radius: 5px;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 1rem;
+            font-family: 'Inter', sans-serif;
         }
 
         .submit-button:hover {
+            background: #692c18;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(130, 69, 49, 0.4);
         }
 
         .submit-button:active {
@@ -188,7 +199,7 @@
             display: flex;
             align-items: center;
             margin: 1.5rem 0;
-            color: #999;
+            color: #8c8c8c;
         }
 
         .divider::before,
@@ -196,48 +207,24 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: #ddd;
+            background: #ededed;
         }
 
         .divider span {
             padding: 0 1rem;
         }
 
-        .social-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 0.8rem;
-        }
-
-        .social-button {
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            background: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .social-button:hover {
-            border-color: #667eea;
-            background: #f9f9f9;
-        }
-
         .signup-link {
             text-align: center;
             margin-top: 1.5rem;
             font-size: 0.9rem;
-            color: #666;
+            color: #8c8c8c;
         }
 
         .signup-link a {
-            color: #667eea;
+            color: #824531;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
         }
 
         .signup-link a:hover {
@@ -247,7 +234,7 @@
         .password-match-indicator {
             font-size: 0.8rem;
             margin-top: 0.3rem;
-            color: #999;
+            color: #8c8c8c;
         }
 
         .password-match-indicator.match {
@@ -264,19 +251,15 @@
                 margin: -2rem -2rem 1rem -2rem;
                 border-radius: 0;
             }
-
-            .social-buttons {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
 <body>
-    <a href="landingpage.html" class="back-home">← Back to Home</a>
+    <a href="landingpage.html" class="back-home">Back to Home</a>
 
     <div class="container">
         <div class="auth-header">
-            <h1>📚 Erika</h1>
+            <h1>Erika</h1>
             <p>Your Smart Campus Assistant</p>
         </div>
 
@@ -309,14 +292,6 @@
                 <button type="submit" class="submit-button">Sign In</button>
             </form>
 
-            <div class="divider"><span>or</span></div>
-
-            <div class="social-buttons">
-                <button class="social-button" onclick="handleSocialLogin('google')" title="Sign in with Google">🔵</button>
-                <button class="social-button" onclick="handleSocialLogin('github')" title="Sign in with GitHub">⚫</button>
-                <button class="social-button" onclick="handleSocialLogin('microsoft')" title="Sign in with Microsoft">🟦</button>
-            </div>
-
             <div class="signup-link">
                 Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Create one</a>
             </div>
@@ -348,14 +323,6 @@
 
                 <button type="submit" class="submit-button">Create Account</button>
             </form>
-
-            <div class="divider"><span>or</span></div>
-
-            <div class="social-buttons">
-                <button class="social-button" onclick="handleSocialSignUp('google')" title="Sign up with Google">🔵</button>
-                <button class="social-button" onclick="handleSocialSignUp('github')" title="Sign up with GitHub">⚫</button>
-                <button class="social-button" onclick="handleSocialSignUp('microsoft')" title="Sign up with Microsoft">🟦</button>
-            </div>
 
             <div class="signup-link">
                 Already have an account? <a href="#" onclick="switchTab('signin'); return false;">Sign in</a>
@@ -419,26 +386,14 @@
             }
 
             if (password === confirm) {
-                indicator.textContent = '✓ Passwords match';
+                indicator.textContent = 'Passwords match';
                 indicator.classList.remove('no-match');
                 indicator.classList.add('match');
             } else {
-                indicator.textContent = '✗ Passwords do not match';
+                indicator.textContent = 'Passwords do not match';
                 indicator.classList.remove('match');
                 indicator.classList.add('no-match');
             }
-        }
-
-        function handleSocialLogin(provider) {
-            // TODO: Replace with actual OAuth implementation
-            alert(`Redirecting to ${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign In...`);
-            console.log(`Social Login: ${provider}`);
-        }
-
-        function handleSocialSignUp(provider) {
-            // TODO: Replace with actual OAuth implementation
-            alert(`Redirecting to ${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign Up...`);
-            console.log(`Social Sign Up: ${provider}`);
         }
     </script>
 </body>

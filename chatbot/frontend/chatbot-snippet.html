@@ -1,0 +1,36 @@
+<!-- chatbot/frontend/chatbot-snippet.html -->
+<!-- Add this snippet to any HTML page to enable the chatbot widget -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Integration Example</title>
+</head>
+<body>
+    <h1>Erika Chatbot Integration Example</h1>
+    <p>The chatbot widget appears as a circle in the bottom-right corner of the page.</p>
+
+    <!-- Your page content here -->
+
+    <!-- 
+    ============================================================
+    CHATBOT WIDGET INTEGRATION
+    ============================================================
+    Simply add this script tag before the closing </body> tag
+    on any page where you want the chatbot to appear:
+    -->
+    
+    <script>
+        // Configure the API endpoint (change to your deployed backend)
+        window.CHATBOT_API_URL = 'https://your-backend.onrender.com/api';
+    </script>
+    <script src="https://your-github-pages-domain.com/chatbot/frontend/chatbot-widget.js"></script>
+
+    <!-- 
+    That's it! The widget will automatically initialize and appear
+    in the bottom-right corner of your page.
+    -->
+</body>
+</html>

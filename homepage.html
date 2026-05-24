@@ -643,8 +643,29 @@
                         <input type="color" id="classColor" value="#824531" required>
                     </div>
                     <div class="form-group">
-                        <label for="classSchedule">Schedule</label>
-                        <input type="text" id="classSchedule" placeholder="e.g., MWF 10:00 AM - 11:00 AM">
+                        <label>Schedule</label>
+                    
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem;">
+                            <label><input type="checkbox" class="schedule-day" value="Monday"> Monday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Tuesday"> Tuesday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Wednesday"> Wednesday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Thursday"> Thursday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Friday"> Friday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Saturday"> Saturday</label>
+                            <label><input type="checkbox" class="schedule-day" value="Sunday"> Sunday</label>
+                        </div>
+                    
+                        <div style="display: flex; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <label for="classStartTime">Start Time</label>
+                                <input type="time" id="classStartTime">
+                            </div>
+                    
+                            <div style="flex: 1;">
+                                <label for="classEndTime">End Time</label>
+                                <input type="time" id="classEndTime">
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="classInstructor">Instructor</label>

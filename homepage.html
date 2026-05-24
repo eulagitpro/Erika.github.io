@@ -93,6 +93,7 @@
             padding: 3rem;
             border-radius: 10px;
             margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
         .hero-content h1 {
@@ -110,25 +111,27 @@
         .hero-stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .stat-box {
             background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
         }
 
         .stat-number {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: bold;
             color: #fae1c8;
+            margin-bottom: 0.5rem;
         }
 
         .stat-label {
             font-size: 0.9rem;
-            opacity: 0.8;
+            opacity: 0.9;
         }
 
         .content-area {
@@ -157,11 +160,12 @@
             font-size: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
 
         .card-icon {
             font-size: 1.3rem;
+            min-width: 1.5rem;
         }
 
         .pending-tasks {
@@ -181,22 +185,24 @@
         .task-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .task-item {
             background: linear-gradient(135deg, #bfd3d8 0%, #e5eaeb 100%);
             border-left: 4px solid #824531;
-            padding: 1.2rem;
+            padding: 1.5rem;
             border-radius: 8px;
             display: flex;
             align-items: flex-start;
             gap: 1rem;
             transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .task-item:hover {
             transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .task-checkbox {
@@ -205,6 +211,7 @@
             margin-top: 2px;
             cursor: pointer;
             accent-color: #824531;
+            flex-shrink: 0;
         }
 
         .task-content {
@@ -213,7 +220,7 @@
 
         .task-content h4 {
             color: #191817;
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.5rem;
             font-size: 0.95rem;
         }
 
@@ -251,18 +258,24 @@
 
         .summary-item {
             background: #f9f9f9;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             border-left: 3px solid #824531;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 1rem;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
         }
 
         .summary-icon {
             font-size: 1.5rem;
             color: #824531;
+            min-width: 1.5rem;
         }
 
         .summary-text {
@@ -271,7 +284,7 @@
 
         .summary-text h4 {
             color: #191817;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.3rem;
             font-size: 0.95rem;
         }
 
@@ -311,6 +324,7 @@
             transition: all 0.3s;
             margin-bottom: 0.8rem;
             font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
         }
 
         .quick-action-btn:last-child {
@@ -320,6 +334,7 @@
         .quick-action-btn:hover {
             background: #692c18;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(130, 69, 49, 0.3);
         }
 
         .quick-action-btn.secondary {
@@ -389,6 +404,7 @@
 
         .modal-header h2 {
             font-size: 1.5rem;
+            margin: 0;
         }
 
         .close-modal {
@@ -417,7 +433,8 @@
         }
 
         .form-group input,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 0.8rem;
             border: 1px solid #ededed;
@@ -427,7 +444,8 @@
         }
 
         .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #824531;
             box-shadow: 0 0 5px rgba(130, 69, 49, 0.2);
@@ -437,6 +455,7 @@
             display: flex;
             gap: 1rem;
             justify-content: flex-end;
+            margin-top: 1.5rem;
         }
 
         .btn {
@@ -494,9 +513,10 @@
 
         .message-bubble {
             max-width: 70%;
-            padding: 0.8rem 1rem;
+            padding: 1rem;
             border-radius: 8px;
             line-height: 1.4;
+            word-wrap: break-word;
         }
 
         .message.user .message-bubble {
@@ -514,13 +534,13 @@
             background: #ffffff;
             border-top: 1px solid #ededed;
             display: flex;
-            gap: 0.8rem;
+            gap: 1rem;
             flex-direction: column;
         }
 
         .input-row {
             display: flex;
-            gap: 0.8rem;
+            gap: 1rem;
         }
 
         .chat-input {
@@ -529,11 +549,13 @@
             border: 1px solid #ededed;
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
         }
 
         .chat-input:focus {
             outline: none;
             border-color: #824531;
+            box-shadow: 0 0 5px rgba(130, 69, 49, 0.2);
         }
 
         .send-btn {
@@ -544,6 +566,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s;
         }
 
         .send-btn:hover {
@@ -558,6 +581,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            transition: all 0.3s;
         }
 
         .file-input-btn:hover {
@@ -592,6 +616,10 @@
             }
 
             .task-list {
+                grid-template-columns: 1fr;
+            }
+
+            .content-area {
                 grid-template-columns: 1fr;
             }
         }
@@ -646,7 +674,7 @@
             <!-- Summary Section -->
             <div class="content-area">
                 <div class="card">
-                    <h2><span class="card-icon">📊</span>Summary</h2>
+                    <h2><span class="card-icon">S</span>Summary</h2>
                     <div id="summary">
                         <div class="empty-state">
                             <p>Add classes and tasks to see your summary here.</p>
@@ -655,7 +683,7 @@
                 </div>
 
                 <div class="card">
-                    <h2><span class="card-icon">🎓</span>My Classes</h2>
+                    <h2><span class="card-icon">C</span>My Classes</h2>
                     <div id="classesOverview">
                         <div class="empty-state">
                             <p>No classes added yet.</p>
@@ -673,7 +701,7 @@
                 <button class="quick-action-btn secondary" onclick="openAddClassModal()">Add Class</button>
                 <button class="quick-action-btn secondary" onclick="openAddTaskModal()">Add Task</button>
                 <a href="calendar.html" style="text-decoration: none;">
-                    <button class="quick-action-btn secondary" style="width: 100%;">View Calendar</button>
+                    <button class="quick-action-btn secondary" style="width: 100%; margin-bottom: 0;">View Calendar</button>
                 </a>
             </div>
 
@@ -766,7 +794,7 @@
                     </div>
                     <div class="form-group">
                         <label for="taskClass">Class</label>
-                        <select id="taskClass" style="width: 100%; padding: 0.8rem; border: 1px solid #ededed; border-radius: 8px;" required>
+                        <select id="taskClass" required>
                             <option value="">Select a class...</option>
                         </select>
                     </div>
@@ -879,28 +907,28 @@
 
             const summaryHtml = `
                 <div class="summary-item">
-                    <div class="summary-icon">📚</div>
+                    <div class="summary-icon">B</div>
                     <div class="summary-text">
                         <h4>Total Classes</h4>
                         <p>${classes.length} class${classes.length !== 1 ? 'es' : ''}</p>
                     </div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-icon">✓</div>
+                    <div class="summary-icon">V</div>
                     <div class="summary-text">
                         <h4>Completed Tasks</h4>
                         <p>${completedTasks} of ${totalTasks}</p>
                     </div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-icon">⏳</div>
+                    <div class="summary-icon">T</div>
                     <div class="summary-text">
                         <h4>Pending Tasks</h4>
                         <p>${pendingTasks} task${pendingTasks !== 1 ? 's' : ''} to complete</p>
                     </div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-icon">📊</div>
+                    <div class="summary-icon">P</div>
                     <div class="summary-text">
                         <h4>Progress</h4>
                         <p>${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% complete</p>
@@ -923,10 +951,10 @@
                 const deadlineCount = (cls.deadlines || []).length;
                 return `
                     <div class="summary-item">
-                        <div class="summary-icon" style="color: ${cls.color || '#824531'};">●</div>
+                        <div class="summary-icon" style="color: ${cls.color || '#824531'};">C</div>
                         <div class="summary-text">
                             <h4>${cls.name}</h4>
-                            <p>${cls.code} • ${deadlineCount} deadline${deadlineCount !== 1 ? 's' : ''}</p>
+                            <p>${cls.code} - ${deadlineCount} deadline${deadlineCount !== 1 ? 's' : ''}</p>
                         </div>
                     </div>
                 `;
@@ -953,10 +981,10 @@
             const deadlineHtml = upcoming.length > 0
                 ? upcoming.map(d => `
                     <div class="summary-item">
-                        <div class="summary-icon" style="color: ${d.classColor || '#824531'};">●</div>
+                        <div class="summary-icon" style="color: ${d.classColor || '#824531'};">D</div>
                         <div class="summary-text">
                             <h4>${d.title}</h4>
-                            <p>${d.className} • ${new Date(d.date).toLocaleDateString()}</p>
+                            <p>${d.className} - ${new Date(d.date).toLocaleDateString()}</p>
                         </div>
                     </div>
                 `).join('')
@@ -973,7 +1001,6 @@
                 classes.map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
         }
 
-        // Modal functions
         function openChatModal() {
             document.getElementById('chatModal').classList.add('active');
         }
@@ -997,130 +1024,6 @@
         function closeAddTaskModal() {
             document.getElementById('addTaskModal').classList.remove('active');
         }
-
-        function handleAddClass(event) {
-            event.preventDefault();
-            const className = document.getElementById('className').value;
-            const classCode = document.getElementById('classCode').value;
-            const classColor = document.getElementById('classColor').value;
-            const classSchedule = document.getElementById('classSchedule').value;
-            const classDeadlines = document.getElementById('classDeadlines').value;
-
-            if (!currentUser.classes) {
-                currentUser.classes = [];
-            }
-
-            const newClass = {
-                id: `class_${Date.now()}`,
-                name: className,
-                code: classCode,
-                color: classColor,
-                schedule: classSchedule,
-                deadlines: classDeadlines.split('\n').filter(d => d.trim()).map(d => ({
-                    title: d.trim(),
-                    date: new Date().toISOString()
-                }))
-            };
-
-            currentUser.classes.push(newClass);
-            saveUserData();
-            displayClasses();
-            populateClassSelect();
-            closeAddClassModal();
-            alert('Class added successfully!');
-        }
-
-        function handleAddTask(event) {
-            event.preventDefault();
-            const taskName = document.getElementById('taskName').value;
-            const taskClass = document.getElementById('taskClass').value;
-            const taskDueDate = document.getElementById('taskDueDate').value;
-            const taskDescription = document.getElementById('taskDescription').value;
-
-            if (!currentUser.tasks) {
-                currentUser.tasks = [];
-            }
-
-            const newTask = {
-                id: `task_${Date.now()}`,
-                name: taskName,
-                classId: taskClass,
-                dueDate: taskDueDate,
-                description: taskDescription,
-                completed: false,
-                createdAt: new Date().toISOString()
-            };
-
-            currentUser.tasks.push(newTask);
-            saveUserData();
-            displayPendingTasks();
-            displayStats();
-            closeAddTaskModal();
-            alert('Task added successfully!');
-        }
-
-        function handleChatKeypress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-
-            // Add message to chat
-            addChatMessage(message, 'user');
-            input.value = '';
-
-            // Simulate response
-            setTimeout(() => {
-                addChatMessage('Thanks for your message! I\'m here to help you manage your academic workload. How can I assist you?', 'erika');
-            }, 500);
-        }
-
-        function addChatMessage(content, sender) {
-            const chatMessages = document.getElementById('chatMessages');
-            
-            if (chatMessages.children.length === 1 && chatMessages.children[0].textContent.includes('Welcome')) {
-                chatMessages.innerHTML = '';
-            }
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender === 'user' ? 'user' : 'erika'}`;
-            messageDiv.innerHTML = `<div class="message-bubble">${content}</div>`;
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                alert(`File uploaded: ${file.name}`);
-            }
-        }
-
-        function saveUserData() {
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                allUsers[userIndex] = currentUser;
-                localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'signin.html';
-        }
     </script>
-
-    <!-- Chatbot Widget -->
-    <script>
-        window.CHATBOT_API_URL = 'https://erika-chatbot-api.onrender.com/api';
-    </script>
-    <script src="chatbot/frontend/chatbot-widget.js"></script>
 </body>
 </html>

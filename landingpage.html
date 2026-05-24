@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erika - Your Smart Campus Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,14 +15,18 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #191817;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Bitter', serif;
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #824531;
+            color: #ffffff;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -28,12 +35,13 @@
         }
 
         .logo {
+            font-family: 'Bitter', serif;
             font-size: 1.8rem;
             font-weight: bold;
         }
 
         nav a {
-            color: white;
+            color: #ffffff;
             margin-left: 2rem;
             text-decoration: none;
             transition: opacity 0.3s;
@@ -45,11 +53,11 @@
 
         .hero {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #bfd3d8;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #191817;
             padding: 2rem;
         }
 
@@ -74,26 +82,26 @@
             font-size: 3.5rem;
             font-weight: bold;
             margin-bottom: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            color: #824531;
         }
 
         .description {
             font-size: 1.3rem;
             line-height: 1.8;
             margin-bottom: 2rem;
-            font-weight: 300;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            font-weight: 400;
+            color: #191817;
         }
 
         .cta-button {
             display: inline-block;
-            background: white;
-            color: #667eea;
+            background: #824531;
+            color: #ffffff;
             padding: 1rem 3rem;
             font-size: 1.1rem;
-            font-weight: bold;
+            font-weight: 600;
             border: none;
-            border-radius: 50px;
+            border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
@@ -101,6 +109,7 @@
         }
 
         .cta-button:hover {
+            background: #692c18;
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
@@ -111,7 +120,14 @@
 
         .features {
             padding: 4rem 2rem;
-            background: #f9f9f9;
+            background: #ffffff;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #824531;
+            margin-bottom: 3rem;
         }
 
         .features-container {
@@ -123,9 +139,9 @@
         }
 
         .feature-card {
-            background: white;
+            background: #e5eaeb;
             padding: 2rem;
-            border-radius: 10px;
+            border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
             transition: transform 0.3s ease;
@@ -141,17 +157,18 @@
         }
 
         .feature-card h3 {
-            color: #667eea;
+            color: #824531;
             margin-bottom: 1rem;
+            font-size: 1.3rem;
         }
 
         .feature-card p {
-            color: #666;
+            color: #8c8c8c;
         }
 
         footer {
-            background: #333;
-            color: white;
+            background: #191817;
+            color: #ffffff;
             text-align: center;
             padding: 2rem;
         }
@@ -159,7 +176,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">📚 Erika</div>
+        <div class="logo">Erika</div>
         <nav>
             <a href="#home">Home</a>
             <a href="#features">Features</a>
@@ -178,6 +195,7 @@
     </section>
 
     <section class="features" id="features">
+        <h2>Features</h2>
         <div class="features-container">
             <div class="feature-card">
                 <div class="feature-icon">📅</div>

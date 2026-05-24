@@ -293,6 +293,10 @@
             color: #8c8c8c;
             font-size: 0.85rem;
         }
+        .page-break {
+            /* Force a page break after this element when printing */
+            break-after: page; 
+          }
 
         .sidebar {
             display: flex;
@@ -854,6 +858,8 @@
             }
         }
 
+        <div class="page-break"></div>
+        
         function displaySummary() {
             const tasks = currentUser.tasks || [];
             const classes = currentUser.classes || [];

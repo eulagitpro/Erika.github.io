@@ -1,5 +1,5 @@
 // chatbot/backend/server.js
-// Main Express server for AI Chatbot API
+// Main Express server for AI Chatbot API - ENHANCED VERSION
 
 const express = require('express');
 const cors = require('cors');
@@ -15,6 +15,26 @@ const { createLogger, transports, format } = require('winston');
 dotenv.config();
 
 const app = express();
+
+// ============= VALIDATION UTILS =============
+const validateInput = {
+  message: (msg) => {
+    if (!msg || typeof msg !== 'string') return false;
+    if (msg.trim().length === 0) return false;
+    if (msg.length > 5000) return false;
+    return true;
+  },
+  userId: (id) => {
+    if (!id || typeof id !== 'string') return false;
+    if (id.length < 3 || id.length > 100) return false;
+    return true;
+  },
+  conversationId: (id) => {
+    if (!id) return true; // optional
+    if (typeof id !== 'string') return false;
+    return id.length > 0 && id.length < 100;
+  }
+};
 
 // ============= LOGGER =============
 const logger = createLogger({
@@ -97,7 +117,7 @@ const llm = new LLMService();
 
 // ============= MEMORY SERVICE =============
 const MemoryService = require('./services/memoryService');
-const memory = new MemoryService();
+const memory = new MemoryService(db);
 
 // ============= ROUTES =============
 
@@ -106,18 +126,32 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    version: '2.0.0-enhanced'
   });
 });
 
-// Chat endpoint
+// Chat endpoint - ENHANCED WITH VALIDATION
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, userId, conversationId, sessionId } = req.body;
 
-    if (!message || !userId) {
+    // Input validation
+    if (!validateInput.message(message)) {
       return res.status(400).json({
-        error: 'Missing required fields: message, userId'
+        error: 'Invalid message: must be a non-empty string (max 5000 chars)'
+      });
+    }
+
+    if (!validateInput.userId(userId)) {
+      return res.status(400).json({
+        error: 'Invalid userId: must be a string (3-100 chars)'
+      });
+    }
+
+    if (!validateInput.conversationId(conversationId)) {
+      return res.status(400).json({
+        error: 'Invalid conversationId format'
       });
     }
 
@@ -126,42 +160,81 @@ app.post('/api/chat', async (req, res) => {
     // Get conversation history for context
     let conversation = null;
     if (conversationId) {
-      conversation = await db.getConversation(userId, conversationId);
+      try {
+        conversation = await db.getConversation(userId, conversationId);
+        if (!conversation) {
+          conversation = await db.createConversation(userId);
+        }
+      } catch (error) {
+        logger.warn(`Failed to fetch conversation ${conversationId}, creating new:`, error);
+        conversation = await db.createConversation(userId);
+      }
     } else {
       conversation = await db.createConversation(userId);
     }
 
     // Retrieve contextual memory (previous conversations)
-    const contextMemory = await memory.retrieveContext(userId, message);
+    let contextMemory = [];
+    try {
+      contextMemory = await memory.retrieveContext(userId, message);
+    } catch (error) {
+      logger.warn('Memory retrieval failed, continuing without context:', error);
+    }
 
     // Build context for LLM
     const context = {
       userId,
       conversationId: conversation.id,
       history: conversation.messages || [],
-      contextMemory,
+      contextMemory: contextMemory || [],
       timestamp: new Date().toISOString()
     };
 
     // Save user message
-    await db.saveMessage(conversation.id, {
-      role: 'user',
-      content: message,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      await db.saveMessage(conversation.id, {
+        role: 'user',
+        content: message.substring(0, 5000),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('Failed to save user message:', error);
+    }
 
     // Get response from LLM
-    const response = await llm.generateResponse(message, context);
+    let response;
+    try {
+      response = await llm.generateResponse(message, context);
+    } catch (error) {
+      logger.error('LLM generation error:', error);
+      // Provide helpful error message to user
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        throw new Error('Authentication error with LLM service');
+      } else if (error.message.includes('429') || error.message.includes('rate')) {
+        throw new Error('LLM service rate limited, please try again later');
+      } else if (error.message.includes('timeout')) {
+        throw new Error('LLM service timeout, please try again');
+      }
+      throw error;
+    }
 
     // Save assistant message
-    await db.saveMessage(conversation.id, {
-      role: 'assistant',
-      content: response,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      await db.saveMessage(conversation.id, {
+        role: 'assistant',
+        content: response.substring(0, 5000),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('Failed to save assistant message:', error);
+    }
 
     // Update memory embeddings
-    await memory.updateEmbedding(userId, message, response);
+    try {
+      await memory.updateEmbedding(userId, message.substring(0, 5000), response.substring(0, 5000));
+    } catch (error) {
+      logger.warn('Memory update failed:', error);
+    }
 
     res.json({
       success: true,
@@ -174,7 +247,7 @@ app.post('/api/chat', async (req, res) => {
     logger.error('Chat endpoint error:', error);
     res.status(500).json({
       error: 'Failed to process chat message',
-      message: error.message
+      message: error.message || 'Unknown error'
     });
   }
 });
@@ -183,6 +256,12 @@ app.post('/api/chat', async (req, res) => {
 app.get('/api/conversations/:userId/:conversationId', async (req, res) => {
   try {
     const { userId, conversationId } = req.params;
+
+    if (!validateInput.userId(userId) || !validateInput.conversationId(conversationId)) {
+      return res.status(400).json({
+        error: 'Invalid userId or conversationId'
+      });
+    }
 
     const conversation = await db.getConversation(userId, conversationId);
 
@@ -209,8 +288,14 @@ app.get('/api/conversations/:userId/:conversationId', async (req, res) => {
 app.get('/api/conversations/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const limit = parseInt(req.query.limit) || 20;
-    const skip = parseInt(req.query.skip) || 0;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+    const skip = Math.max(parseInt(req.query.skip) || 0, 0);
+
+    if (!validateInput.userId(userId)) {
+      return res.status(400).json({
+        error: 'Invalid userId'
+      });
+    }
 
     const conversations = await db.getConversations(userId, limit, skip);
 
@@ -233,6 +318,12 @@ app.delete('/api/conversations/:userId/:conversationId', async (req, res) => {
   try {
     const { userId, conversationId } = req.params;
 
+    if (!validateInput.userId(userId) || !validateInput.conversationId(conversationId)) {
+      return res.status(400).json({
+        error: 'Invalid userId or conversationId'
+      });
+    }
+
     await db.deleteConversation(userId, conversationId);
 
     res.json({
@@ -253,9 +344,15 @@ app.post('/api/memory/search', async (req, res) => {
   try {
     const { userId, query } = req.body;
 
-    if (!userId || !query) {
+    if (!validateInput.userId(userId) || !query || query.length === 0) {
       return res.status(400).json({
-        error: 'Missing required fields: userId, query'
+        error: 'Missing or invalid userId, query'
+      });
+    }
+
+    if (query.length > 1000) {
+      return res.status(400).json({
+        error: 'Query too long (max 1000 chars)'
       });
     }
 
@@ -278,6 +375,12 @@ app.post('/api/memory/search', async (req, res) => {
 app.delete('/api/memory/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+
+    if (!validateInput.userId(userId)) {
+      return res.status(400).json({
+        error: 'Invalid userId'
+      });
+    }
 
     await memory.clearUserMemory(userId);
 
@@ -311,14 +414,30 @@ app.use((req, res) => {
   });
 });
 
+// ============= GRACEFUL SHUTDOWN =============
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(async () => {
+    logger.info('HTTP server closed');
+    try {
+      await db.close();
+      logger.info('Database connection closed');
+    } catch (error) {
+      logger.error('Error closing database:', error);
+    }
+    process.exit(0);
+  });
+});
+
 // ============= START SERVER =============
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info(`Chatbot API server running on port ${PORT}`);
   logger.info(`CORS enabled for: ${process.env.CORS_ORIGIN || 'localhost'}`);
   logger.info(`LLM Provider: ${process.env.LLM_PROVIDER || 'openrouter'}`);
   logger.info(`Database: ${process.env.DATABASE_TYPE || 'mongodb'}`);
+  logger.info('🚀 Server is ready to accept connections');
 });
 
 module.exports = app;

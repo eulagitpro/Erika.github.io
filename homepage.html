@@ -862,6 +862,14 @@
                             <div class="summary-text">
                                 <h4>${cls.name}</h4>
                                 <p>${cls.code || 'No code'}</p>
+                                
+                                <p style="font-size: 0.8rem; color: #692c18; margin-top: 0.3rem;">
+                                    ${
+                                        cls.schedule && cls.schedule.days?.length
+                                        ? `${cls.schedule.days.join(', ')} | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
+                                        : 'No schedule set'
+                                    }
+                                </p>
                             </div>
                         </div>
                         <button onclick="editClass('${cls.id}')" style="background: none; border: none; color: #824531; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Edit</button>
@@ -928,6 +936,12 @@
             document.getElementById('classSchedule').value = '';
             document.getElementById('classInstructor').value = '';
             document.getElementById('addClassModal').classList.add('active');
+            document.querySelectorAll('.schedule-day').forEach(day => {
+                day.checked = false;
+            });
+            
+            document.getElementById('classStartTime').value = '';
+            document.getElementById('classEndTime').value = '';
         }
 
         function closeAddClassModal() {
@@ -941,7 +955,17 @@
             const name = document.getElementById('className').value.trim();
             const code = document.getElementById('classCode').value.trim();
             const color = document.getElementById('classColor').value;
-            const schedule = document.getElementById('classSchedule').value.trim();
+            const selectedDays = [...document.querySelectorAll('.schedule-day:checked')]
+                .map(day => day.value);
+            
+            const startTime = document.getElementById('classStartTime').value;
+            const endTime = document.getElementById('classEndTime').value;
+            
+            const schedule = {
+                days: selectedDays,
+                startTime,
+                endTime
+            };
             const instructor = document.getElementById('classInstructor').value.trim();
             const errorDiv = document.getElementById('classError');
 
@@ -1002,7 +1026,12 @@
                 document.getElementById('className').value = cls.name;
                 document.getElementById('classCode').value = cls.code;
                 document.getElementById('classColor').value = cls.color || '#824531';
-                document.getElementById('classSchedule').value = cls.schedule || '';
+                document.querySelectorAll('.schedule-day').forEach(day => {
+                    day.checked = cls.schedule?.days?.includes(day.value) || false;
+                });
+                
+                document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
+                document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
                 document.getElementById('classInstructor').value = cls.instructor || '';
                 document.getElementById('classError').classList.remove('show');
                 document.getElementById('addClassModal').classList.add('active');

@@ -3,7 +3,7 @@
 
 class ChatbotWidget {
   constructor(config = {}) {
-    this.apiUrl = config.apiUrl || 'http://localhost:3000/api';
+    this.apiUrl = config.apiUrl || 'https://erika-chatbot-api.onrender.com/api';
     this.userId = config.userId || this.generateUserId();
     this.conversationId = null;
     this.isOpen = false;
@@ -604,11 +604,11 @@ class ChatbotWidget {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     window.erikaChatbot = new ChatbotWidget({
-      apiUrl: window.CHATBOT_API_URL || 'https://your-render-app.onrender.com/api'
+      apiUrl: window.CHATBOT_API_URL || 'https://erika-chatbot-api.onrender.com/api'
     });
   });
 } else {
   window.erikaChatbot = new ChatbotWidget({
-    apiUrl: window.CHATBOT_API_URL || 'https://your-render-app.onrender.com/api'
+    apiUrl: window.CHATBOT_API_URL || 'https://erika-chatbot-api.onrender.com/api'
   });
 }

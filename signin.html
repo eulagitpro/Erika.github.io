@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Erika</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me input {
+            margin-right: 0.5rem;
+        }
+
+        .forgot-password {
+            color: #667eea;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .forgot-password:hover {
+            opacity: 0.8;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: #999;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider span {
+            padding: 0 1rem;
+        }
+
+        .social-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .social-button {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .social-button:hover {
+            border-color: #667eea;
+            background: #f9f9f9;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .password-match-indicator {
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            color: #999;
+        }
+
+        .password-match-indicator.match {
+            color: #4caf50;
+        }
+
+        .password-match-indicator.no-match {
+            color: #f44336;
+        }
+
+        @media (max-width: 600px) {
+            .back-home {
+                position: static;
+                margin: -2rem -2rem 1rem -2rem;
+                border-radius: 0;
+            }
+
+            .social-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="landingpage.html" class="back-home">← Back to Home</a>
+
+    <div class="container">
+        <div class="auth-header">
+            <h1>📚 Erika</h1>
+            <p>Your Smart Campus Assistant</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('signin')">Sign In</button>
+            <button class="tab-button" onclick="switchTab('signup')">Create Account</button>
+        </div>
+
+        <!-- Sign In Tab -->
+        <div id="signin" class="tab-content active">
+            <form onsubmit="handleSignIn(event)">
+                <div class="form-group">
+                    <label for="signin-email">Email Address</label>
+                    <input type="email" id="signin-email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" placeholder="Enter your password" required>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember-me">
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="submit-button">Sign In</button>
+            </form>
+
+            <div class="divider"><span>or</span></div>
+
+            <div class="social-buttons">
+                <button class="social-button" onclick="handleSocialLogin('google')" title="Sign in with Google">🔵</button>
+                <button class="social-button" onclick="handleSocialLogin('github')" title="Sign in with GitHub">⚫</button>
+                <button class="social-button" onclick="handleSocialLogin('microsoft')" title="Sign in with Microsoft">🟦</button>
+            </div>
+
+            <div class="signup-link">
+                Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Create one</a>
+            </div>
+        </div>
+
+        <!-- Create Account Tab -->
+        <div id="signup" class="tab-content">
+            <form onsubmit="handleSignUp(event)">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <input type="text" id="signup-name" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a strong password" required onkeyup="checkPasswordMatch()">
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-confirm">Confirm Password</label>
+                    <input type="password" id="signup-confirm" placeholder="Confirm your password" required onkeyup="checkPasswordMatch()">
+                    <div id="password-match" class="password-match-indicator"></div>
+                </div>
+
+                <button type="submit" class="submit-button">Create Account</button>
+            </form>
+
+            <div class="divider"><span>or</span></div>
+
+            <div class="social-buttons">
+                <button class="social-button" onclick="handleSocialSignUp('google')" title="Sign up with Google">🔵</button>
+                <button class="social-button" onclick="handleSocialSignUp('github')" title="Sign up with GitHub">⚫</button>
+                <button class="social-button" onclick="handleSocialSignUp('microsoft')" title="Sign up with Microsoft">🟦</button>
+            </div>
+
+            <div class="signup-link">
+                Already have an account? <a href="#" onclick="switchTab('signin'); return false;">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        function handleSignIn(event) {
+            event.preventDefault();
+            const email = document.getElementById('signin-email').value;
+            const password = document.getElementById('signin-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+
+            // TODO: Replace with actual authentication API call
+            alert(`Sign in attempt:\nEmail: ${email}\nPassword: ${password}\nRemember me: ${rememberMe}`);
+            console.log('Sign In Data:', { email, password, rememberMe });
+        }
+
+        function handleSignUp(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+
+            if (password !== confirm) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // TODO: Replace with actual authentication API call
+            alert(`Account creation attempt:\nName: ${name}\nEmail: ${email}\nPassword: ${password}`);
+            console.log('Sign Up Data:', { name, email, password });
+        }
+
+        function checkPasswordMatch() {
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            const indicator = document.getElementById('password-match');
+
+            if (!password || !confirm) {
+                indicator.textContent = '';
+                return;
+            }
+
+            if (password === confirm) {
+                indicator.textContent = '✓ Passwords match';
+                indicator.classList.remove('no-match');
+                indicator.classList.add('match');
+            } else {
+                indicator.textContent = '✗ Passwords do not match';
+                indicator.classList.remove('match');
+                indicator.classList.add('no-match');
+            }
+        }
+
+        function handleSocialLogin(provider) {
+            // TODO: Replace with actual OAuth implementation
+            alert(`Redirecting to ${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign In...`);
+            console.log(`Social Login: ${provider}`);
+        }
+
+        function handleSocialSignUp(provider) {
+            // TODO: Replace with actual OAuth implementation
+            alert(`Redirecting to ${provider.charAt(0).toUpperCase() + provider.slice(1)} Sign Up...`);
+            console.log(`Social Sign Up: ${provider}`);
+        }
+    </script>
+</body>
+</html>

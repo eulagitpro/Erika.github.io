@@ -55,7 +55,8 @@
         .nav-links a {
             color: #ffffff;
             text-decoration: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
         }
 
         .nav-links a:hover {
@@ -346,7 +347,6 @@
             background: #a8bfc8;
         }
 
-        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -486,110 +486,17 @@
             background: #e5eaeb;
         }
 
-        /* Chat Modal */
-        .chat-modal-content {
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-            max-height: 80vh;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            background: #fae1c8;
-        }
-
-        .message {
-            margin-bottom: 1rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message-bubble {
-            max-width: 70%;
-            padding: 1rem;
-            border-radius: 8px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .message.user .message-bubble {
-            background: #824531;
+        .error-message {
+            background: #f44336;
             color: #ffffff;
-        }
-
-        .message.erika .message-bubble {
-            background: #e5eaeb;
-            color: #191817;
-        }
-
-        .chat-input-section {
-            padding: 1.5rem;
-            background: #ffffff;
-            border-top: 1px solid #ededed;
-            display: flex;
-            gap: 1rem;
-            flex-direction: column;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .chat-input {
-            flex: 1;
             padding: 0.8rem;
-            border: 1px solid #ededed;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: #824531;
-            box-shadow: 0 0 5px rgba(130, 69, 49, 0.2);
-        }
-
-        .send-btn {
-            background: #824531;
-            color: #ffffff;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .send-btn:hover {
-            background: #692c18;
-        }
-
-        .file-input-btn {
-            background: #bfd3d8;
-            color: #191817;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .file-input-btn:hover {
-            background: #a8bfc8;
-        }
-
-        #fileInput {
+            border-radius: 5px;
+            margin-bottom: 1rem;
             display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         @media (max-width: 1200px) {
@@ -599,14 +506,6 @@
 
             .content-area {
                 grid-template-columns: 1fr;
-            }
-
-            .hero-stats {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .task-list {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
         }
 
@@ -639,7 +538,6 @@
 
     <div class="main-grid">
         <div>
-            <!-- Hero Section -->
             <div class="hero-section">
                 <div class="hero-content">
                     <h1>Welcome, <span id="userGreeting">User</span>!</h1>
@@ -661,7 +559,6 @@
                 </div>
             </div>
 
-            <!-- Pending Tasks -->
             <div class="pending-tasks">
                 <h2>Pending Tasks</h2>
                 <div class="task-list" id="taskList">
@@ -671,7 +568,6 @@
                 </div>
             </div>
 
-            <!-- Summary Section -->
             <div class="content-area">
                 <div class="card">
                     <h2><span class="card-icon">S</span>Summary</h2>
@@ -693,7 +589,6 @@
             </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-card">
                 <h3>Quick Actions</h3>
@@ -714,42 +609,27 @@
         </div>
     </div>
 
-    <!-- Chat Modal -->
     <div id="chatModal" class="modal">
-        <div class="modal-content chat-modal-content">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2>Chat with Erika</h2>
                 <button class="close-modal" onclick="closeChatModal()">&times;</button>
             </div>
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input-section">
-                <div class="input-row">
-                    <input 
-                        type="text" 
-                        class="chat-input" 
-                        id="chatInput" 
-                        placeholder="Type your message..." 
-                        onkeypress="handleChatKeypress(event)"
-                    >
-                    <button class="send-btn" onclick="sendMessage()">Send</button>
-                </div>
-                <div>
-                    <button class="file-input-btn" onclick="document.getElementById('fileInput').click()">Upload File</button>
-                    <input type="file" id="fileInput" onchange="handleFileUpload(event)" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
-                </div>
+            <div class="modal-body">
+                <p>Chat feature coming soon!</p>
             </div>
         </div>
     </div>
 
-    <!-- Add Class Modal -->
     <div id="addClassModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add New Class</h2>
+                <h2 id="classModalTitle">Add New Class</h2>
                 <button class="close-modal" onclick="closeAddClassModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form onsubmit="handleAddClass(event)">
+                <div class="error-message" id="classError"></div>
+                <form onsubmit="handleSaveClass(event)">
                     <div class="form-group">
                         <label for="className">Class Name</label>
                         <input type="text" id="className" placeholder="e.g., Introduction to Computer Science" required>
@@ -763,12 +643,12 @@
                         <input type="color" id="classColor" value="#824531" required>
                     </div>
                     <div class="form-group">
-                        <label for="classSchedule">Schedule (e.g., MWF 10:00 AM - 11:00 AM)</label>
-                        <input type="text" id="classSchedule" placeholder="MWF 10:00 AM - 11:00 AM">
+                        <label for="classSchedule">Schedule</label>
+                        <input type="text" id="classSchedule" placeholder="e.g., MWF 10:00 AM - 11:00 AM">
                     </div>
                     <div class="form-group">
-                        <label for="classDeadlines">Deadlines and Important Dates</label>
-                        <textarea id="classDeadlines" placeholder="Paste deadlines from your syllabus..." rows="5"></textarea>
+                        <label for="classInstructor">Instructor</label>
+                        <input type="text" id="classInstructor" placeholder="Professor Name">
                     </div>
                     <div class="form-buttons">
                         <button type="button" class="btn btn-secondary" onclick="closeAddClassModal()">Cancel</button>
@@ -779,7 +659,6 @@
         </div>
     </div>
 
-    <!-- Add Task Modal -->
     <div id="addTaskModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -787,7 +666,8 @@
                 <button class="close-modal" onclick="closeAddTaskModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form onsubmit="handleAddTask(event)">
+                <div class="error-message" id="taskError"></div>
+                <form onsubmit="handleSaveTask(event)">
                     <div class="form-group">
                         <label for="taskName">Task Name</label>
                         <input type="text" id="taskName" placeholder="e.g., Complete Assignment 3" required>
@@ -815,9 +695,9 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         let currentUser = null;
+        let editingClassId = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             initializePage();
@@ -839,6 +719,9 @@
                 return;
             }
 
+            if (!currentUser.classes) currentUser.classes = [];
+            if (!currentUser.tasks) currentUser.tasks = [];
+
             document.getElementById('userGreeting').textContent = currentUser.nickname;
 
             displayStats();
@@ -847,11 +730,14 @@
             displayClasses();
             displayUpcomingDeadlines();
             populateClassSelect();
+        }
 
-            if (currentUser.isFirstTime) {
-                setTimeout(() => {
-                    openChatModal();
-                }, 500);
+        function saveUserData() {
+            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+            const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
+            if (userIndex !== -1) {
+                allUsers[userIndex] = currentUser;
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
             }
         }
 
@@ -948,14 +834,16 @@
             }
 
             const classesHtml = classes.map(cls => {
-                const deadlineCount = (cls.deadlines || []).length;
                 return `
-                    <div class="summary-item">
-                        <div class="summary-icon" style="color: ${cls.color || '#824531'};">C</div>
-                        <div class="summary-text">
-                            <h4>${cls.name}</h4>
-                            <p>${cls.code} - ${deadlineCount} deadline${deadlineCount !== 1 ? 's' : ''}</p>
+                    <div class="summary-item" style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                            <div class="summary-icon" style="color: ${cls.color || '#824531'};">C</div>
+                            <div class="summary-text">
+                                <h4>${cls.name}</h4>
+                                <p>${cls.code || 'No code'}</p>
+                            </div>
                         </div>
+                        <button onclick="editClass('${cls.id}')" style="background: none; border: none; color: #824531; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Edit</button>
                     </div>
                 `;
             }).join('');
@@ -1010,19 +898,159 @@
         }
 
         function openAddClassModal() {
+            editingClassId = null;
+            document.getElementById('classModalTitle').textContent = 'Add New Class';
+            document.getElementById('classError').classList.remove('show');
+            document.getElementById('className').value = '';
+            document.getElementById('classCode').value = '';
+            document.getElementById('classColor').value = '#824531';
+            document.getElementById('classSchedule').value = '';
+            document.getElementById('classInstructor').value = '';
             document.getElementById('addClassModal').classList.add('active');
         }
 
         function closeAddClassModal() {
             document.getElementById('addClassModal').classList.remove('active');
+            editingClassId = null;
+        }
+
+        function handleSaveClass(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('className').value.trim();
+            const code = document.getElementById('classCode').value.trim();
+            const color = document.getElementById('classColor').value;
+            const schedule = document.getElementById('classSchedule').value.trim();
+            const instructor = document.getElementById('classInstructor').value.trim();
+            const errorDiv = document.getElementById('classError');
+
+            errorDiv.classList.remove('show');
+
+            if (!name) {
+                errorDiv.textContent = 'Please enter a class name.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (!code) {
+                errorDiv.textContent = 'Please enter a class code.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (editingClassId) {
+                const classIndex = currentUser.classes.findIndex(c => c.id === editingClassId);
+                if (classIndex !== -1) {
+                    currentUser.classes[classIndex] = {
+                        ...currentUser.classes[classIndex],
+                        name,
+                        code,
+                        color,
+                        schedule,
+                        instructor
+                    };
+                }
+            } else {
+                const newClass = {
+                    id: `class_${Date.now()}`,
+                    name,
+                    code,
+                    color,
+                    schedule,
+                    instructor,
+                    deadlines: [],
+                    meetings: []
+                };
+                currentUser.classes.push(newClass);
+            }
+
+            saveUserData();
+            closeAddClassModal();
+            displayStats();
+            displayClasses();
+            displayUpcomingDeadlines();
+            populateClassSelect();
+        }
+
+        function editClass(classId) {
+            editingClassId = classId;
+            const cls = currentUser.classes.find(c => c.id === classId);
+            
+            if (cls) {
+                document.getElementById('classModalTitle').textContent = 'Edit Class';
+                document.getElementById('className').value = cls.name;
+                document.getElementById('classCode').value = cls.code;
+                document.getElementById('classColor').value = cls.color || '#824531';
+                document.getElementById('classSchedule').value = cls.schedule || '';
+                document.getElementById('classInstructor').value = cls.instructor || '';
+                document.getElementById('classError').classList.remove('show');
+                document.getElementById('addClassModal').classList.add('active');
+            }
         }
 
         function openAddTaskModal() {
+            document.getElementById('taskError').classList.remove('show');
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskClass').value = '';
+            document.getElementById('taskDueDate').value = '';
+            document.getElementById('taskDescription').value = '';
             document.getElementById('addTaskModal').classList.add('active');
         }
 
         function closeAddTaskModal() {
             document.getElementById('addTaskModal').classList.remove('active');
+        }
+
+        function handleSaveTask(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('taskName').value.trim();
+            const classId = document.getElementById('taskClass').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const description = document.getElementById('taskDescription').value.trim();
+            const errorDiv = document.getElementById('taskError');
+
+            errorDiv.classList.remove('show');
+
+            if (!name) {
+                errorDiv.textContent = 'Please enter a task name.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (!classId) {
+                errorDiv.textContent = 'Please select a class.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (!dueDate) {
+                errorDiv.textContent = 'Please select a due date.';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            const newTask = {
+                id: `task_${Date.now()}`,
+                name,
+                classId,
+                dueDate,
+                description,
+                completed: false
+            };
+
+            currentUser.tasks.push(newTask);
+            saveUserData();
+            closeAddTaskModal();
+            displayStats();
+            displayPendingTasks();
+            displaySummary();
+            displayUpcomingDeadlines();
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'landingpage.html';
         }
     </script>
 </body>

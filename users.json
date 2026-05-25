@@ -152,5 +152,54 @@
     "appointments": [],
     "chatHistory": [],
     "workStrategies": []
+  },
+  {
+    "id": "user_002",
+    "nickname": "Eula",
+    "email": "eula@example.com",
+    "password": "hashed_password_here",
+    "createdAt": 1716576000000,
+    "lastLogin": 1716576000000,
+    "isFirstTime": true,
+    "classes": [
+      {
+        "id": "philo11",
+        "name": "Philo 11.05",
+        "code": "Philo 11.05",
+        "color": "#e8956f",
+        "className": "philo"
+      },
+      {
+        "id": "faa102",
+        "name": "FAA 102",
+        "code": "FAA 102",
+        "color": "#6ba6c2",
+        "className": "faa"
+      },
+      {
+        "id": "math201",
+        "name": "Math 201",
+        "code": "Math 201",
+        "color": "#b366d9",
+        "className": "math"
+      }
+    ],
+    "classSessions": [
+      {
+        "id": "session_philo_mwf",
+        "classId": "philo11",
+        "className": "philo",
+        "daysOfWeek": [1, 3, 5],
+        "startTime": "14:00",
+        "endTime": "15:30",
+        "startDate": "2026-01-07",
+        "endDate": "2026-05-16",
+        "description": "Philo 11.05 - Monday, Wednesday, Friday"
+      }
+    ],
+    "tasks": [],
+    "appointments": [],
+    "chatHistory": [],
+    "workStrategies": []
   }
 ]

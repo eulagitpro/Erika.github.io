@@ -703,6 +703,10 @@
             color: #4caf50;
         }
 
+        .sync-status.error {
+            color: #f44336;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -794,7 +798,7 @@
             <div class="modal-body">
                 <div class="error-message" id="eventError"></div>
                 <div class="success-message" id="eventSuccess"></div>
-                <form onsubmit="handleSaveEvent(event)">
+                <form id="eventForm" onsubmit="handleSaveEvent(event)">
                     <div class="form-group">
                         <label for="eventTitle">Event Title</label>
                         <input type="text" id="eventTitle" placeholder="e.g., Midterm Exam" required>
@@ -820,13 +824,6 @@
                         <textarea id="eventDescription" placeholder="Add event details..." rows="4"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="eventCalendar">Calendar</label>
-                        <select id="eventCalendar" required>
-                            <option value="">Select a calendar</option>
-                        </select>
-                    </div>
-
                     <div class="form-buttons">
                         <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save to Google Calendar</button>
@@ -845,10 +842,9 @@
 
     <script>
         // ===== CONFIGURATION =====
-        // TODO: Replace with your actual Google Cloud credentials
-        const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
-        const GOOGLE_API_KEY = 'YOUR_API_KEY_HERE';
-        const CALENDAR_ID = 'YOUR_CALENDAR_ID_HERE';
+        const GOOGLE_CLIENT_ID = '168953203343-v4qapbm649os4m9o3nbbu7tdm3l198bi.apps.googleusercontent.com';
+        const GOOGLE_API_KEY = 'ca6255882afe60254683d1789018c1dd4b348be0e41dee364d9fabcc7ee9d3d5';
+        const CALENDAR_ID = 'ca6255882afe60254683d1789018c1dd4b348be0e41dee364d9fabcc7ee9d3d5@group.calendar.google.com';
 
         // ===== GLOBAL VARIABLES =====
         let currentUser = null;
@@ -937,7 +933,6 @@
             }).then(function(response) {
                 googleCalendars = response.result.items || [];
                 updateCalendarFilter();
-                populateCalendarSelect();
                 updateSyncStatus('Calendars loaded successfully', 'synced');
             }).catch(function(error) {
                 console.error('Error loading calendars:', error);
@@ -968,6 +963,7 @@
                     events.forEach(event => {
                         event.calendarName = calendar.summary;
                         event.calendarId = calendar.id;
+                        event.calendarColor = calendar.backgroundColor || '#824531';
                         googleEvents.push(event);
                     });
                     loadedCount++;
@@ -1004,17 +1000,6 @@
                     </label>
                 `;
                 filterList.appendChild(filterItem);
-            });
-        }
-
-        function populateCalendarSelect() {
-            const calendarSelect = document.getElementById('eventCalendar');
-            calendarSelect.innerHTML = '<option value="">Select a calendar</option>';
-            googleCalendars.forEach(calendar => {
-                const option = document.createElement('option');
-                option.value = calendar.id;
-                option.textContent = calendar.summary;
-                calendarSelect.appendChild(option);
             });
         }
 
@@ -1295,6 +1280,9 @@
         }
 
         function getEventColor(event, shade = 'dark') {
+            if (event.calendarColor) {
+                return event.calendarColor;
+            }
             const calendar = googleCalendars.find(cal => cal.id === event.calendarId);
             if (calendar) {
                 if (shade === 'light') {
@@ -1341,35 +1329,54 @@
             const startTime = document.getElementById('eventStartTime').value;
             const endTime = document.getElementById('eventEndTime').value;
             const description = document.getElementById('eventDescription').value;
-            const calendarId = document.getElementById('eventCalendar').value;
 
-            if (!calendarId) {
-                showError('Please select a calendar');
+            if (!title || !date) {
+                showError('Please fill in all required fields');
                 return;
             }
 
             updateSyncStatus('Creating event...', 'syncing');
 
+            let startDateTime, endDateTime;
+            
+            if (startTime) {
+                startDateTime = new Date(`${date}T${startTime}:00`);
+            } else {
+                startDateTime = new Date(date);
+                startDateTime.setHours(0, 0, 0, 0);
+            }
+
+            if (endTime) {
+                endDateTime = new Date(`${date}T${endTime}:00`);
+            } else if (startTime) {
+                endDateTime = new Date(startDateTime);
+                endDateTime.setHours(endDateTime.getHours() + 1);
+            } else {
+                endDateTime = new Date(startDateTime);
+                endDateTime.setDate(endDateTime.getDate() + 1);
+            }
+
             const event = {
                 summary: title,
                 description: description,
                 start: {
-                    dateTime: startTime ? new Date(`${date}T${startTime}:00`).toISOString() : new Date(date).toISOString(),
+                    dateTime: startDateTime.toISOString(),
                     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 },
                 end: {
-                    dateTime: endTime ? new Date(`${date}T${endTime}:00`).toISOString() : new Date(new Date(date).getTime() + 3600000).toISOString(),
+                    dateTime: endDateTime.toISOString(),
                     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 }
             };
 
             gapi.client.calendar.events.insert({
-                calendarId: calendarId,
+                calendarId: CALENDAR_ID,
                 resource: event
             }).then(function(response) {
                 showSuccess('Event created successfully!');
                 closeEventModal();
                 loadGoogleEvents();
+                updateSyncStatus('Event created successfully', 'synced');
             }).catch(function(error) {
                 console.error('Error creating event:', error);
                 showError('Failed to create event. Please try again.');

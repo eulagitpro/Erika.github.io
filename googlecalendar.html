@@ -109,6 +109,37 @@
             margin: 0 auto;
         }
 
+        .setup-notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: #856404;
+        }
+
+        .setup-notice h2 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .setup-notice ol {
+            margin-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .setup-notice li {
+            margin-bottom: 0.8rem;
+        }
+
+        .setup-notice code {
+            background: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #333;
+        }
+
         .controls-section {
             background: #ffffff;
             border-radius: 10px;
@@ -750,6 +781,25 @@
     </header>
 
     <div class="container">
+        <div class="setup-notice" id="setupNotice">
+            <h2>⚠️ Setup Required: Google Calendar Configuration</h2>
+            <p>Before using this calendar, you need to configure the Google API credentials. Follow these steps:</p>
+            <ol>
+                <li><strong>Go to Google Cloud Console:</strong> <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: #0066cc;">https://console.cloud.google.com/apis/credentials</a></li>
+                <li><strong>Find your OAuth 2.0 Client ID</strong> (created for this calendar)</li>
+                <li><strong>Click Edit (pencil icon)</strong></li>
+                <li><strong>Add Authorized Redirect URIs:</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>For local testing: <code>http://localhost:8000</code></li>
+                        <li>For GitHub Pages: <code>https://eulagitpro.github.io</code></li>
+                    </ul>
+                </li>
+                <li><strong>Click Save</strong></li>
+                <li><strong>Refresh this page</strong> and try signing in again</li>
+            </ol>
+            <p style="margin-top: 1rem; color: #d9534f;"><strong>Important:</strong> The redirect URIs in Google Cloud Console must exactly match where you're accessing this calendar from.</p>
+        </div>
+
         <div class="controls-section">
             <div class="date-nav">
                 <button class="nav-btn" onclick="previousPeriod()">Previous</button>
@@ -874,14 +924,16 @@
                     apiKey: GOOGLE_API_KEY,
                     clientId: GOOGLE_CLIENT_ID,
                     scope: 'https://www.googleapis.com/auth/calendar',
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest']
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+                    ux_mode: 'popup'
                 }).then(function() {
                     const auth2 = gapi.auth2.getAuthInstance();
                     auth2.isSignedIn.listen(updateSignInStatus);
                     updateSignInStatus(auth2.isSignedIn.get());
+                    document.getElementById('setupNotice').style.display = 'none';
                 }).catch(function(error) {
                     console.error('Error initializing Google API:', error);
-                    updateSyncStatus('Failed to initialize Google Calendar', 'error');
+                    updateSyncStatus('Setup Required: Add redirect URI in Google Cloud Console', 'error');
                 });
             });
         }
@@ -908,6 +960,7 @@
                 userInfo.style.display = 'block';
                 authBtn.textContent = 'Sign Out';
                 addEventBtn.disabled = false;
+                document.getElementById('setupNotice').style.display = 'none';
                 loadGoogleCalendars();
                 loadGoogleEvents();
             } else {
@@ -916,6 +969,7 @@
                 addEventBtn.disabled = true;
                 googleEvents = [];
                 renderCalendar();
+                document.getElementById('setupNotice').style.display = 'block';
             }
         }
 

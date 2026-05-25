@@ -384,6 +384,7 @@
 
         .modal-content.chat-modal {
             max-width: 900px;
+            height: 85vh;        /* add this */
             max-height: 85vh;
             display: flex;
             flex-direction: column;
@@ -436,7 +437,9 @@
         .modal-body.chat-modal-body {
             padding: 0;
             overflow: hidden;
-        }
+            height: 600px;  /* add this */
+            min-height: 500px;
+        }    
 
         .chat-modal-body iframe {
             width: 100%;
@@ -662,8 +665,7 @@
             </div>
             <div class="modal-body chat-modal-body">
                 <iframe id="chatbotIframe"
-                        src="https://copilotstudio.microsoft.com/environments/Default-56090e62-2540-4107-916f-cd9690f423d3/bots/cr293_erikaSemesterPlanner/webchat?__version__=2" 
-                        frameborder="0" 
+                        frameborder="0"
                         style="width: 100%; height: 100%;"
                         allow="geolocation; microphone; camera"></iframe>
             </div>
@@ -1007,6 +1009,10 @@
         }
 
         function openChatModal() {
+            const iframe = document.getElementById('chatbotIframe');
+            if (!iframe.src || iframe.src === 'about:blank') {
+                iframe.src = 'https://copilotstudio.microsoft.com/environments/Default-56090e62-2540-4107-916f-cd9690f423d3/bots/cr293_erikaSemesterPlanner/webchat?__version__=2';
+            }
             document.getElementById('chatModal').classList.add('active');
         }
 

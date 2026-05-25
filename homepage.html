@@ -946,7 +946,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button onclick="editClass('${cls.id}')" style="background: none; border: none; color: #824531; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Edit</button>
+                        <button type="button" onclick="editClass('${cls.id}')" style="background: none; border: none; color: #824531; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Edit</button>
                     </div>
                 `;
             }).join('');
@@ -956,14 +956,16 @@
 
         function displayUpcomingDeadlines() {
             const allDeadlines = [];
-            (currentUser.classes || []).forEach(cls => {
-                (cls.deadlines || []).forEach(deadline => {
+            (currentUser.tasks || []).forEach(task => {
+                if (!task.completed) {
+                    const classInfo = (currentUser.classes || []).find(c => c.id === task.classId);
                     allDeadlines.push({
-                        ...deadline,
-                        className: cls.name,
-                        classColor: cls.color
+                        title: task.name,
+                        date: task.dueDate,
+                        className: classInfo ? classInfo.name : 'General',
+                        classColor: classInfo ? classInfo.color : '#824531'
                     });
-                });
+                }
             });
 
             allDeadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1057,19 +1059,33 @@
 
             if (!currentUser.classes) currentUser.classes = [];
 
-            const newClass = {
-                id: Date.now().toString(),
-                name: className,
-                code: classCode,
-                color: classColor,
-                instructor: classInstructor,
-                schedule: schedule,
-                deadlines: []
-            };
+            if (editingClassId) {
+                const classIndex = currentUser.classes.findIndex(c => c.id === editingClassId);
+                if (classIndex !== -1) {
+                    currentUser.classes[classIndex] = {
+                        ...currentUser.classes[classIndex],
+                        name: className,
+                        code: classCode,
+                        color: classColor,
+                        instructor: classInstructor,
+                        schedule: schedule
+                    };
+                }
+            } else {
+                const newClass = {
+                    id: Date.now().toString(),
+                    name: className,
+                    code: classCode,
+                    color: classColor,
+                    instructor: classInstructor,
+                    schedule: schedule,
+                    deadlines: [],
+                    meetings: []
+                };
+                currentUser.classes.push(newClass);
+            }
 
-            currentUser.classes.push(newClass);
             saveUserData();
-
             closeAddClassModal();
             displayClasses();
             displayStats();
@@ -1109,6 +1125,7 @@
             displayPendingTasks();
             displayStats();
             displaySummary();
+            displayUpcomingDeadlines();
         }
 
         function editClass(classId) {

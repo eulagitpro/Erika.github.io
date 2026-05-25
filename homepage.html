@@ -661,9 +661,11 @@
                 <button class="close-modal" onclick="closeChatModal()">&times;</button>
             </div>
             <div class="modal-body chat-modal-body">
-                <iframe src="https://copilotstudio.microsoft.com/environments/Default-56090e62-2540-4107-916f-cd9690f423d3/bots/cr293_erikaSemesterPlanner/webchat?__version__=2" 
+                <iframe id="chatbotIframe"
+                        src="https://copilotstudio.microsoft.com/environments/Default-56090e62-2540-4107-916f-cd9690f423d3/bots/cr293_erikaSemesterPlanner/webchat?__version__=2" 
                         frameborder="0" 
-                        style="width: 100%; height: 100%;"></iframe>
+                        style="width: 100%; height: 100%;"
+                        allow="geolocation; microphone; camera"></iframe>
             </div>
         </div>
     </div>
@@ -790,12 +792,22 @@
         </div>
     </div>
 
+    <!-- Load Copilot Bridge for chatbot integration -->
+    <script src="chatbot/copilot-bridge.js"></script>
+
     <script>
         let currentUser = null;
         let editingClassId = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             initializePage();
+            // Verify bridge is loaded
+            if (window.copilotBridge) {
+                console.log('✓ Copilot Bridge loaded successfully');
+                console.log('Available functions:', Object.keys(window.erikaBridge || {}));
+            } else {
+                console.warn('⚠ Copilot Bridge not loaded');
+            }
         });
 
         function initializePage() {
@@ -1005,27 +1017,21 @@
         function openAddClassModal() {
             editingClassId = null;
             document.getElementById('classModalTitle').textContent = 'Add New Class';
-            document.getElementById('classError').classList.remove('show');
             document.getElementById('className').value = '';
             document.getElementById('classCode').value = '';
             document.getElementById('classColor').value = '#824531';
-            document.getElementById('classInstructor').value = '';
-            document.getElementById('addClassModal').classList.add('active');
-            document.querySelectorAll('.schedule-day').forEach(day => {
-                day.checked = false;
-            });
-            
             document.getElementById('classStartTime').value = '';
             document.getElementById('classEndTime').value = '';
+            document.getElementById('classInstructor').value = '';
+            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
+            document.getElementById('addClassModal').classList.add('active');
         }
 
         function closeAddClassModal() {
             document.getElementById('addClassModal').classList.remove('active');
-            editingClassId = null;
         }
 
         function openAddTaskModal() {
-            document.getElementById('taskError').classList.remove('show');
             document.getElementById('taskName').value = '';
             document.getElementById('taskClass').value = '';
             document.getElementById('taskDueDate').value = '';
@@ -1039,48 +1045,40 @@
 
         function handleSaveClass(event) {
             event.preventDefault();
+
             const className = document.getElementById('className').value;
             const classCode = document.getElementById('classCode').value;
             const classColor = document.getElementById('classColor').value;
             const classInstructor = document.getElementById('classInstructor').value;
-            const errorDiv = document.getElementById('classError');
+            const startTime = document.getElementById('classStartTime').value;
+            const endTime = document.getElementById('classEndTime').value;
+
+            const selectedDays = Array.from(document.querySelectorAll('.schedule-day:checked'))
+                .map(cb => cb.value);
 
             if (!className || !classCode) {
-                errorDiv.textContent = 'Please fill in all required fields';
-                errorDiv.classList.add('show');
+                document.getElementById('classError').textContent = 'Please fill in all required fields';
+                document.getElementById('classError').classList.add('show');
                 return;
             }
 
-            const schedule = {
-                days: Array.from(document.querySelectorAll('.schedule-day:checked')).map(el => el.value),
-                startTime: document.getElementById('classStartTime').value || '',
-                endTime: document.getElementById('classEndTime').value || ''
-            };
-
-            if (!currentUser.classes) currentUser.classes = [];
-
             if (editingClassId) {
-                const classIndex = currentUser.classes.findIndex(c => c.id === editingClassId);
-                if (classIndex !== -1) {
-                    currentUser.classes[classIndex] = {
-                        ...currentUser.classes[classIndex],
-                        name: className,
-                        code: classCode,
-                        color: classColor,
-                        instructor: classInstructor,
-                        schedule: schedule
-                    };
+                const cls = currentUser.classes.find(c => c.id === editingClassId);
+                if (cls) {
+                    cls.name = className;
+                    cls.code = classCode;
+                    cls.color = classColor;
+                    cls.instructor = classInstructor;
+                    cls.schedule = { days: selectedDays, startTime, endTime };
                 }
             } else {
                 const newClass = {
-                    id: Date.now().toString(),
+                    id: `class_${Date.now()}`,
                     name: className,
                     code: classCode,
                     color: classColor,
                     instructor: classInstructor,
-                    schedule: schedule,
-                    deadlines: [],
-                    meetings: []
+                    schedule: { days: selectedDays, startTime, endTime }
                 };
                 currentUser.classes.push(newClass);
             }
@@ -1088,65 +1086,63 @@
             saveUserData();
             closeAddClassModal();
             displayClasses();
-            displayStats();
             populateClassSelect();
+            displayStats();
         }
 
         function handleSaveTask(event) {
             event.preventDefault();
-            const taskName = document.getElementById('taskName').value;
-            const taskClass = document.getElementById('taskClass').value;
-            const taskDueDate = document.getElementById('taskDueDate').value;
-            const taskDescription = document.getElementById('taskDescription').value;
-            const errorDiv = document.getElementById('taskError');
 
-            if (!taskName || !taskClass || !taskDueDate) {
-                errorDiv.textContent = 'Please fill in all required fields';
-                errorDiv.classList.add('show');
+            const taskName = document.getElementById('taskName').value;
+            const classId = document.getElementById('taskClass').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const description = document.getElementById('taskDescription').value;
+
+            if (!taskName || !classId || !dueDate) {
+                document.getElementById('taskError').textContent = 'Please fill in all required fields';
+                document.getElementById('taskError').classList.add('show');
                 return;
             }
 
-            if (!currentUser.tasks) currentUser.tasks = [];
-
             const newTask = {
-                id: Date.now().toString(),
+                id: `task_${Date.now()}`,
                 name: taskName,
-                classId: taskClass,
-                dueDate: taskDueDate,
-                description: taskDescription,
-                completed: false,
-                createdAt: new Date().toISOString()
+                classId: classId,
+                dueDate: dueDate,
+                description: description,
+                completed: false
             };
 
+            if (!currentUser.tasks) currentUser.tasks = [];
             currentUser.tasks.push(newTask);
-            saveUserData();
 
+            saveUserData();
             closeAddTaskModal();
             displayPendingTasks();
-            displayStats();
             displaySummary();
             displayUpcomingDeadlines();
+            displayStats();
         }
 
         function editClass(classId) {
-            const cls = (currentUser.classes || []).find(c => c.id === classId);
-            if (!cls) return;
-
             editingClassId = classId;
-            document.getElementById('classModalTitle').textContent = 'Edit Class';
-            document.getElementById('className').value = cls.name;
-            document.getElementById('classCode').value = cls.code;
-            document.getElementById('classColor').value = cls.color;
-            document.getElementById('classInstructor').value = cls.instructor || '';
+            const cls = currentUser.classes.find(c => c.id === classId);
+            
+            if (cls) {
+                document.getElementById('classModalTitle').textContent = 'Edit Class';
+                document.getElementById('className').value = cls.name;
+                document.getElementById('classCode').value = cls.code;
+                document.getElementById('classColor').value = cls.color;
+                document.getElementById('classInstructor').value = cls.instructor || '';
+                document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
+                document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
 
-            document.querySelectorAll('.schedule-day').forEach(day => {
-                day.checked = (cls.schedule?.days || []).includes(day.value);
-            });
+                document.querySelectorAll('.schedule-day').forEach(cb => {
+                    cb.checked = cls.schedule?.days?.includes(cb.value) || false;
+                });
 
-            document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
-            document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
-
-            document.getElementById('addClassModal').classList.add('active');
+                document.getElementById('addClassModal').classList.add('active');
+            }
         }
 
         function logout() {

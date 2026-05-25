@@ -68,6 +68,17 @@
             outline-offset: 2px;
         }
 
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
         .logout-btn {
             background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
@@ -333,30 +344,9 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .event-item.philo {
-            background: #fce4d6;
-            border-left-color: #e8956f;
-        }
-
-        .event-item.faa {
-            background: #d4e9f0;
-            border-left-color: #6ba6c2;
-        }
-
-        .event-item.math {
-            background: #e8d5f0;
-            border-left-color: #b366d9;
-        }
-
         .event-title {
             font-weight: 600;
             color: #191817;
-        }
-
-        .event-class {
-            font-size: 0.7rem;
-            color: #8c8c8c;
-            margin-top: 0.2rem;
         }
 
         .event-time {
@@ -431,21 +421,6 @@
             gap: 0.1rem;
         }
 
-        .week-event.philo {
-            background: #fce4d6;
-            border-left-color: #e8956f;
-        }
-
-        .week-event.faa {
-            background: #d4e9f0;
-            border-left-color: #6ba6c2;
-        }
-
-        .week-event.math {
-            background: #e8d5f0;
-            border-left-color: #b366d9;
-        }
-
         .week-event:hover {
             transform: scale(1.02);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -514,13 +489,6 @@
             color: #8c8c8c;
             font-size: 0.9rem;
             margin-bottom: 0.3rem;
-        }
-
-        .day-event-class {
-            color: #692c18;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
         }
 
         .day-event-time {
@@ -720,53 +688,19 @@
             }
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+        .sync-status {
+            font-size: 0.85rem;
+            color: #8c8c8c;
+            text-align: center;
+            padding: 0.5rem;
         }
 
-        .time-option {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.8rem;
+        .sync-status.syncing {
+            color: #FFA500;
         }
 
-        .time-option input {
-            width: auto;
-            cursor: pointer;
-        }
-
-        .time-option label {
-            margin: 0;
-            font-weight: 400;
-            cursor: pointer;
-        }
-
-        .schedule-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.8rem;
-            margin: 1rem 0;
-        }
-
-        .day-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .day-checkbox input {
-            width: auto;
-            cursor: pointer;
-        }
-
-        .day-checkbox label {
-            margin: 0;
-            font-weight: 400;
-            cursor: pointer;
-            font-size: 0.9rem;
+        .sync-status.synced {
+            color: #4caf50;
         }
 
         @media (max-width: 768px) {
@@ -793,14 +727,6 @@
                 flex-direction: column;
                 gap: 1rem;
             }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .schedule-days {
-                grid-template-columns: repeat(4, 1fr);
-            }
         }
     </style>
 </head>
@@ -813,7 +739,10 @@
                 <a href="calendar.html">Calendar</a>
             </div>
         </div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <div class="auth-section">
+            <div class="user-info" id="userInfo" style="display: none;"></div>
+            <button class="logout-btn" id="authBtn" onclick="handleAuthClick()">Sign In with Google</button>
+        </div>
     </header>
 
     <div class="container">
@@ -833,8 +762,10 @@
             <button class="add-event-btn" onclick="openAddEventModal()">Add Event</button>
         </div>
 
+        <div class="sync-status" id="syncStatus"></div>
+
         <div class="filter-section">
-            <div class="filter-title">Filter by Course</div>
+            <div class="filter-title">Filter by Calendar</div>
             <div class="filter-list" id="filterList"></div>
         </div>
 
@@ -857,7 +788,7 @@
     <div id="eventModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Add Event</h2>
+                <h2 id="modalTitle">Add Event to Google Calendar</h2>
                 <button class="close-modal" onclick="closeEventModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -865,95 +796,23 @@
                 <div class="success-message" id="eventSuccess"></div>
                 <form onsubmit="handleSaveEvent(event)">
                     <div class="form-group">
-                        <label for="eventType">Event Type</label>
-                        <select id="eventType" onchange="updateEventForm()" required>
-                            <option value="">Select event type</option>
-                            <option value="class">Class (Recurring)</option>
-                            <option value="exam">Exam/Assignment</option>
-                            <option value="task">Personal Task</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="eventTitle">Event Title</label>
                         <input type="text" id="eventTitle" placeholder="e.g., Midterm Exam" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="eventClass">Class (Optional)</label>
-                        <select id="eventClass">
-                            <option value="">No class (Personal/Extracurricular)</option>
-                        </select>
+                        <label for="eventDate">Date</label>
+                        <input type="date" id="eventDate" required>
                     </div>
 
-                    <!-- For Class Recurring Events -->
-                    <div id="classScheduleSection" style="display: none;">
-                        <div class="form-group">
-                            <label>Days of Week (Select when this class meets)</label>
-                            <div class="schedule-days">
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="monday" value="1">
-                                    <label for="monday">Mon</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="tuesday" value="2">
-                                    <label for="tuesday">Tue</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="wednesday" value="3">
-                                    <label for="wednesday">Wed</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="thursday" value="4">
-                                    <label for="thursday">Thu</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="friday" value="5">
-                                    <label for="friday">Fri</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="saturday" value="6">
-                                    <label for="saturday">Sat</label>
-                                </div>
-                                <div class="day-checkbox">
-                                    <input type="checkbox" id="sunday" value="0">
-                                    <label for="sunday">Sun</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="classStartTime">Class Start Time</label>
-                            <input type="time" id="classStartTime" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="classEndTime">Class End Time</label>
-                            <input type="time" id="classEndTime" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="classStartDate">Start Date (First day of class)</label>
-                            <input type="date" id="classStartDate" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="classEndDate">End Date (Last day of class)</label>
-                            <input type="date" id="classEndDate" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="eventStartTime">Start Time</label>
+                        <input type="time" id="eventStartTime">
                     </div>
 
-                    <!-- For Exams and Tasks -->
-                    <div id="eventDateSection" style="display: none;">
-                        <div class="form-group">
-                            <label for="eventDate">Date</label>
-                            <input type="date" id="eventDate" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="eventTime">Time (Optional)</label>
-                            <input type="time" id="eventTime">
-                        </div>
+                    <div class="form-group">
+                        <label for="eventEndTime">End Time</label>
+                        <input type="time" id="eventEndTime">
                     </div>
 
                     <div class="form-group">
@@ -961,9 +820,16 @@
                         <textarea id="eventDescription" placeholder="Add event details..." rows="4"></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label for="eventCalendar">Calendar</label>
+                        <select id="eventCalendar" required>
+                            <option value="">Select a calendar</option>
+                        </select>
+                    </div>
+
                     <div class="form-buttons">
                         <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Event</button>
+                        <button type="submit" class="btn btn-primary">Save to Google Calendar</button>
                     </div>
                 </form>
             </div>
@@ -974,169 +840,241 @@
     <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
     <script src="https://files.bpcontent.cloud/2026/05/25/14/20260525144219-HM3RDDTF.js" defer></script>
 
+    <!-- Google API Script -->
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+
     <script>
+        // ===== CONFIGURATION =====
+        // TODO: Replace with your actual Google Cloud credentials
+        const GOOGLE_CLIENT_ID = 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+        const GOOGLE_API_KEY = 'YOUR_API_KEY_HERE';
+        const CALENDAR_ID = 'YOUR_CALENDAR_ID_HERE';
+
+        // ===== GLOBAL VARIABLES =====
         let currentUser = null;
         let currentDate = new Date();
         let currentView = 'month';
-        let visibleClasses = new Set();
+        let visibleCalendars = new Set();
+        let googleCalendars = [];
+        let googleEvents = [];
+        let isAuthenticated = false;
 
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                           'July', 'August', 'September', 'October', 'November', 'December'];
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayShortNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        // Pre-populated courses
-        const defaultCourses = [
-            {
-                id: 'philo11',
-                name: 'Philo 11.05',
-                code: 'Philo 11.05',
-                color: '#e8956f',
-                className: 'philo'
-            },
-            {
-                id: 'faa102',
-                name: 'FAA 102',
-                code: 'FAA 102',
-                color: '#6ba6c2',
-                className: 'faa'
-            },
-            {
-                id: 'math61',
-                name: 'MATH 61.2',
-                code: 'MATH 61.2',
-                color: '#b366d9',
-                className: 'math'
-            }
-        ];
-
-        // Pre-populated exams as tasks
-        const defaultExams = [
-            { courseId: 'philo11', name: 'Philo — Long Test 1', dueDate: '2026-02-15', className: 'philo' },
-            { courseId: 'philo11', name: 'Philo — Long Test 2', dueDate: '2026-03-21', className: 'philo' },
-            { courseId: 'philo11', name: 'Philo — Final Oral Exam', dueDate: '2026-05-13', className: 'philo' },
-            { courseId: 'faa102', name: 'FAA — Midterm Exam', dueDate: '2026-03-11', className: 'faa' },
-            { courseId: 'faa102', name: 'FAA — Final Exam', dueDate: '2026-05-12', className: 'faa' },
-            { courseId: 'math61', name: 'Math — Long Test 1', dueDate: '2026-06-20', className: 'math' },
-            { courseId: 'math61', name: 'Math — Long Test 2', dueDate: '2026-07-03', className: 'math' },
-            { courseId: 'math61', name: 'Math — Long Test 3', dueDate: '2026-07-15', className: 'math' }
-        ];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initializePage();
+        // ===== INITIALIZATION =====
+        window.addEventListener('load', function() {
+            initializeGoogleAuth();
+            updateCurrentDate();
+            renderCalendar();
         });
 
-        function initializePage() {
-            const userEmail = localStorage.getItem('currentUser');
-            
-            if (!userEmail) {
-                window.location.href = 'signin.html';
-                return;
-            }
-
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            currentUser = allUsers.find(u => u.email === userEmail);
-
-            if (!currentUser) {
-                window.location.href = 'signin.html';
-                return;
-            }
-
-            // Initialize classes with default courses if not already done
-            if (!currentUser.classes || currentUser.classes.length === 0) {
-                currentUser.classes = defaultCourses.map(c => ({ ...c }));
-            }
-
-            if (!currentUser.tasks) currentUser.tasks = [];
-            if (!currentUser.classSessions) currentUser.classSessions = [];
-
-            // Add default exams if they don't exist
-            defaultExams.forEach(exam => {
-                if (!currentUser.tasks.find(t => t.name === exam.name && t.dueDate === exam.dueDate)) {
-                    currentUser.tasks.push({
-                        id: `task_${Date.now()}_${Math.random()}`,
-                        name: exam.name,
-                        classId: exam.courseId,
-                        dueDate: exam.dueDate,
-                        description: '',
-                        completed: false,
-                        createdAt: new Date().getTime()
-                    });
-                }
+        // ===== GOOGLE AUTHENTICATION =====
+        function initializeGoogleAuth() {
+            gapi.load('client:auth2', function() {
+                gapi.client.init({
+                    apiKey: GOOGLE_API_KEY,
+                    clientId: GOOGLE_CLIENT_ID,
+                    scope: 'https://www.googleapis.com/auth/calendar',
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest']
+                }).then(function() {
+                    const auth2 = gapi.auth2.getAuthInstance();
+                    auth2.isSignedIn.listen(updateSignInStatus);
+                    updateSignInStatus(auth2.isSignedIn.get());
+                }).catch(function(error) {
+                    console.error('Error initializing Google API:', error);
+                    updateSyncStatus('Failed to initialize Google Calendar', 'error');
+                });
             });
-
-            saveUserData();
-
-            (currentUser.classes || []).forEach(cls => {
-                visibleClasses.add(cls.id);
-            });
-
-            renderCalendar();
-            renderFilters();
-            populateEventClassSelect();
         }
 
-        function saveUserData() {
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                allUsers[userIndex] = currentUser;
-                localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            }
-        }
-
-        function renderFilters() {
-            const filterList = document.getElementById('filterList');
-            const classes = currentUser.classes || [];
-
-            if (classes.length === 0) {
-                filterList.innerHTML = '<p style="color: #8c8c8c; font-size: 0.95rem;">No classes added yet.</p>';
-                return;
-            }
-
-            filterList.innerHTML = classes.map(cls => `
-                <div class="filter-item">
-                    <input 
-                        type="checkbox" 
-                        class="filter-checkbox" 
-                        id="filter-${cls.id}" 
-                        checked 
-                        onchange="toggleClassVisibility('${cls.id}')"
-                    >
-                    <label for="filter-${cls.id}" class="filter-label">
-                        <div class="color-dot" style="background-color: ${cls.color || '#824531'};"></div>
-                        ${cls.name}
-                    </label>
-                </div>
-            `).join('');
-        }
-
-        function toggleClassVisibility(classId) {
-            if (visibleClasses.has(classId)) {
-                visibleClasses.delete(classId);
+        function handleAuthClick() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            if (auth2.isSignedIn.get()) {
+                auth2.signOut();
             } else {
-                visibleClasses.add(classId);
+                auth2.signIn();
+            }
+        }
+
+        function updateSignInStatus(isSignedIn) {
+            isAuthenticated = isSignedIn;
+            const authBtn = document.getElementById('authBtn');
+            const userInfo = document.getElementById('userInfo');
+            const addEventBtn = document.querySelector('.add-event-btn');
+
+            if (isSignedIn) {
+                const user = gapi.auth2.getAuthInstance().currentUser.get();
+                const profile = user.getBasicProfile();
+                userInfo.textContent = `Signed in as ${profile.getName()}`;
+                userInfo.style.display = 'block';
+                authBtn.textContent = 'Sign Out';
+                addEventBtn.disabled = false;
+                loadGoogleCalendars();
+                loadGoogleEvents();
+            } else {
+                userInfo.style.display = 'none';
+                authBtn.textContent = 'Sign In with Google';
+                addEventBtn.disabled = true;
+                googleEvents = [];
+                renderCalendar();
+            }
+        }
+
+        function updateSyncStatus(message, status = 'syncing') {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.textContent = message;
+            syncStatus.className = `sync-status ${status}`;
+        }
+
+        // ===== CALENDAR OPERATIONS =====
+        function loadGoogleCalendars() {
+            updateSyncStatus('Loading calendars...', 'syncing');
+            gapi.client.calendar.calendarList.list({
+                maxResults: 25
+            }).then(function(response) {
+                googleCalendars = response.result.items || [];
+                updateCalendarFilter();
+                populateCalendarSelect();
+                updateSyncStatus('Calendars loaded successfully', 'synced');
+            }).catch(function(error) {
+                console.error('Error loading calendars:', error);
+                updateSyncStatus('Failed to load calendars', 'error');
+            });
+        }
+
+        function loadGoogleEvents() {
+            if (!isAuthenticated || googleCalendars.length === 0) return;
+
+            updateSyncStatus('Syncing events...', 'syncing');
+            const now = new Date();
+            const maxDate = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+
+            let loadedCount = 0;
+            googleEvents = [];
+
+            googleCalendars.forEach(calendar => {
+                gapi.client.calendar.events.list({
+                    calendarId: calendar.id,
+                    timeMin: now.toISOString(),
+                    timeMax: maxDate.toISOString(),
+                    showDeleted: false,
+                    singleEvents: true,
+                    orderBy: 'startTime'
+                }).then(function(response) {
+                    const events = response.result.items || [];
+                    events.forEach(event => {
+                        event.calendarName = calendar.summary;
+                        event.calendarId = calendar.id;
+                        googleEvents.push(event);
+                    });
+                    loadedCount++;
+                    if (loadedCount === googleCalendars.length) {
+                        renderCalendar();
+                        updateSyncStatus('Events synced successfully', 'synced');
+                    }
+                }).catch(function(error) {
+                    console.error(`Error loading events from ${calendar.summary}:`, error);
+                    loadedCount++;
+                    if (loadedCount === googleCalendars.length) {
+                        renderCalendar();
+                        updateSyncStatus('Sync completed with errors', 'error');
+                    }
+                });
+            });
+        }
+
+        function updateCalendarFilter() {
+            const filterList = document.getElementById('filterList');
+            filterList.innerHTML = '';
+
+            googleCalendars.forEach(calendar => {
+                const calendarId = calendar.id;
+                visibleCalendars.add(calendarId);
+
+                const filterItem = document.createElement('div');
+                filterItem.className = 'filter-item';
+                filterItem.innerHTML = `
+                    <input type="checkbox" id="cal-${calendarId}" class="filter-checkbox" checked onchange="toggleCalendarVisibility('${calendarId}')">
+                    <label for="cal-${calendarId}" class="filter-label">
+                        <span class="color-dot" style="background-color: ${calendar.backgroundColor || '#824531'};"></span>
+                        ${calendar.summary}
+                    </label>
+                `;
+                filterList.appendChild(filterItem);
+            });
+        }
+
+        function populateCalendarSelect() {
+            const calendarSelect = document.getElementById('eventCalendar');
+            calendarSelect.innerHTML = '<option value="">Select a calendar</option>';
+            googleCalendars.forEach(calendar => {
+                const option = document.createElement('option');
+                option.value = calendar.id;
+                option.textContent = calendar.summary;
+                calendarSelect.appendChild(option);
+            });
+        }
+
+        function toggleCalendarVisibility(calendarId) {
+            if (visibleCalendars.has(calendarId)) {
+                visibleCalendars.delete(calendarId);
+            } else {
+                visibleCalendars.add(calendarId);
             }
             renderCalendar();
+        }
+
+        // ===== DATE NAVIGATION =====
+        function previousPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() - 7);
+            } else if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() - 1);
+            }
+            updateCurrentDate();
+            renderCalendar();
+        }
+
+        function nextPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else if (currentView === 'day') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            updateCurrentDate();
+            renderCalendar();
+        }
+
+        function updateCurrentDate() {
+            const dateElement = document.getElementById('currentDate');
+            if (currentView === 'month') {
+                dateElement.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            } else if (currentView === 'week') {
+                const weekStart = getWeekStart(currentDate);
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                dateElement.textContent = `${monthNames[weekStart.getMonth()]} ${weekStart.getDate()} - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}`;
+            } else if (currentView === 'day') {
+                dateElement.textContent = `${dayNames[currentDate.getDay()]}, ${monthNames[currentDate.getMonth()]} ${currentDate.getDate()}`;
+            }
         }
 
         function switchView(view) {
             currentView = view;
-            
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
-            document.getElementById('monthView').classList.remove('active');
-            document.getElementById('weekView').classList.remove('active');
-            document.getElementById('dayView').classList.remove('active');
-
-            document.getElementById(view + 'View').classList.add('active');
-
+            updateCurrentDate();
             renderCalendar();
         }
 
+        // ===== CALENDAR RENDERING =====
         function renderCalendar() {
             if (currentView === 'month') {
                 renderMonthView();
@@ -1148,362 +1086,314 @@
         }
 
         function renderMonthView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const prevLastDay = new Date(year, month, 0).getDate();
-            const nextDays = 7 - lastDay.getDay() - 1;
+            const monthGrid = document.getElementById('monthGrid');
+            monthGrid.innerHTML = '';
 
-            document.getElementById('currentDate').textContent = `${monthNames[month]} ${year}`;
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
 
-            let html = '';
-            
-            for (let i = 0; i < 7; i++) {
-                html += `<div class="weekday-header">${dayNames[i].substring(0, 3)}</div>`;
-            }
+            // Add weekday headers
+            dayShortNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'weekday-header';
+                header.textContent = day;
+                monthGrid.appendChild(header);
+            });
 
-            for (let i = firstDay.getDay() - 1; i >= 0; i--) {
-                html += `<div class="day-cell other-month"><div class="day-number">${prevLastDay - i}</div></div>`;
-            }
+            // Add day cells
+            let currentCell = new Date(startDate);
+            for (let i = 0; i < 42; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
 
-            for (let i = 1; i <= lastDay.getDate(); i++) {
-                const date = new Date(year, month, i);
-                const isToday = date.toDateString() === new Date().toDateString();
-                const events = getEventsForDate(date);
-                
-                html += `<div class="day-cell ${isToday ? 'today' : ''}">`;
-                html += `<div class="day-number">${i}</div>`;
-                events.forEach(event => {
-                    if (visibleClasses.has(event.classId) || !event.classId) {
-                        html += `
-                            <div class="event-item ${event.className || ''}" title="${event.title}${event.time ? ' - ' + event.time : ''}">
-                                <div class="event-title">${event.title}</div>
-                                ${event.className ? `<div class="event-class">${event.className}</div>` : ''}
-                                ${event.time ? `<div class="event-time">${event.time}</div>` : ''}
-                            </div>
-                        `;
-                    }
+                if (currentCell.getMonth() !== currentDate.getMonth()) {
+                    dayCell.classList.add('other-month');
+                }
+
+                if (isToday(currentCell)) {
+                    dayCell.classList.add('today');
+                }
+
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = currentCell.getDate();
+                dayCell.appendChild(dayNumber);
+
+                // Get events for this day
+                const dayEvents = getEventsForDate(currentCell);
+                dayEvents.forEach(event => {
+                    const eventElement = createEventElement(event);
+                    dayCell.appendChild(eventElement);
                 });
-                html += `</div>`;
-            }
 
-            for (let i = 1; i <= nextDays; i++) {
-                html += `<div class="day-cell other-month"><div class="day-number">${i}</div></div>`;
+                monthGrid.appendChild(dayCell);
+                currentCell.setDate(currentCell.getDate() + 1);
             }
-
-            document.getElementById('monthGrid').innerHTML = html;
         }
 
         function renderWeekView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = currentDate.getDate();
-            
-            const curr = new Date(year, month, day);
-            const first = curr.getDate() - curr.getDay();
-            const weekStart = new Date(curr.setDate(first));
-            
-            let html = '<div class="time-label"></div>';
-            
+            const weekGrid = document.getElementById('weekGrid');
+            weekGrid.innerHTML = '';
+
+            const weekStart = getWeekStart(currentDate);
+            const hours = Array.from({length: 24}, (_, i) => i);
+
+            // Add time column header
+            const timeHeader = document.createElement('div');
+            timeHeader.className = 'week-header';
+            timeHeader.textContent = 'Time';
+            weekGrid.appendChild(timeHeader);
+
+            // Add day headers
             for (let i = 0; i < 7; i++) {
-                const date = new Date(weekStart);
-                date.setDate(date.getDate() + i);
-                html += `<div class="week-header">${dayShortNames[date.getDay()]}<br>${date.getDate()}</div>`;
+                const dayDate = new Date(weekStart);
+                dayDate.setDate(dayDate.getDate() + i);
+                const header = document.createElement('div');
+                header.className = 'week-header';
+                header.textContent = `${dayShortNames[dayDate.getDay()]}\n${dayDate.getDate()}`;
+                weekGrid.appendChild(header);
             }
 
-            const times = [];
-            for (let i = 7; i < 22; i++) {
-                times.push(`${i.toString().padStart(2, '0')}:00`);
-                html += `<div class="time-label">${i.toString().padStart(2, '0')}:00</div>`;
-                for (let j = 0; j < 7; j++) {
-                    const date = new Date(weekStart);
-                    date.setDate(date.getDate() + j);
-                    const events = getEventsForDateAndTime(date, i);
-                    html += `<div class="week-cell">`;
-                    events.forEach(event => {
-                        if (visibleClasses.has(event.classId) || !event.classId) {
-                            html += `
-                                <div class="week-event ${event.className || ''}">
-                                    <div class="week-event-title">${event.title}</div>
-                                    ${event.time ? `<div class="week-event-time">${event.time}</div>` : ''}
-                                </div>
-                            `;
-                        }
+            // Add time cells with events
+            hours.forEach(hour => {
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'time-label';
+                timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+                weekGrid.appendChild(timeLabel);
+
+                for (let i = 0; i < 7; i++) {
+                    const cellDate = new Date(weekStart);
+                    cellDate.setDate(cellDate.getDate() + i);
+                    const weekCell = document.createElement('div');
+                    weekCell.className = 'week-cell';
+
+                    const dayEvents = getEventsForDate(cellDate);
+                    dayEvents.forEach(event => {
+                        const eventElement = createWeekEventElement(event);
+                        weekCell.appendChild(eventElement);
                     });
-                    html += `</div>`;
-                }
-            }
 
-            document.getElementById('weekGrid').innerHTML = html;
-            document.getElementById('currentDate').textContent = `Week of ${monthNames[weekStart.getMonth()]} ${weekStart.getDate()}`;
+                    weekGrid.appendChild(weekCell);
+                }
+            });
         }
 
         function renderDayView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = currentDate.getDate();
-            
-            document.getElementById('dayViewHeader').textContent = 
-                `${dayNames[currentDate.getDay()]}, ${monthNames[month]} ${day}, ${year}`;
-            
-            const events = getEventsForDate(currentDate);
-            let html = '';
+            const dayViewHeader = document.getElementById('dayViewHeader');
+            const dayEvents = document.getElementById('dayEvents');
+            dayViewHeader.textContent = `${dayNames[currentDate.getDay()]}, ${monthNames[currentDate.getMonth()]} ${currentDate.getDate()}`;
+            dayEvents.innerHTML = '';
 
+            const events = getEventsForDate(currentDate);
             if (events.length === 0) {
-                html = '<p style="color: #8c8c8c; text-align: center; padding: 2rem;">No events scheduled for this day</p>';
+                dayEvents.innerHTML = '<p style="color: #8c8c8c; text-align: center; padding: 2rem;">No events scheduled for this day</p>';
             } else {
                 events.forEach(event => {
-                    if (visibleClasses.has(event.classId) || !event.classId) {
-                        html += `
-                            <div class="day-event-card">
-                                <div class="day-event-info">
-                                    <h3>${event.title}</h3>
-                                    ${event.className ? `<div class="day-event-class">${event.className}</div>` : ''}
-                                    ${event.time ? `<div class="day-event-time">${event.time}</div>` : ''}
-                                    ${event.description ? `<p>${event.description}</p>` : ''}
-                                </div>
-                            </div>
-                        `;
-                    }
+                    const eventCard = createDayEventCard(event);
+                    dayEvents.appendChild(eventCard);
                 });
             }
-
-            document.getElementById('dayEvents').innerHTML = html;
         }
 
+        // ===== EVENT ELEMENTS =====
+        function createEventElement(event) {
+            const eventElement = document.createElement('div');
+            eventElement.className = 'event-item';
+            eventElement.style.backgroundColor = getEventColor(event, 'light');
+            eventElement.style.borderLeftColor = getEventColor(event, 'dark');
+
+            const title = document.createElement('div');
+            title.className = 'event-title';
+            title.textContent = event.summary || event.title;
+
+            const time = document.createElement('div');
+            time.className = 'event-time';
+            if (event.start && event.start.dateTime) {
+                const startTime = new Date(event.start.dateTime);
+                time.textContent = startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+
+            eventElement.appendChild(title);
+            if (time.textContent) eventElement.appendChild(time);
+            return eventElement;
+        }
+
+        function createWeekEventElement(event) {
+            const eventElement = document.createElement('div');
+            eventElement.className = 'week-event';
+            eventElement.style.backgroundColor = getEventColor(event, 'light');
+            eventElement.style.borderLeftColor = getEventColor(event, 'dark');
+
+            const title = document.createElement('div');
+            title.className = 'week-event-title';
+            title.textContent = event.summary || event.title;
+            eventElement.appendChild(title);
+
+            if (event.start && event.start.dateTime) {
+                const time = document.createElement('div');
+                time.className = 'week-event-time';
+                const startTime = new Date(event.start.dateTime);
+                time.textContent = startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                eventElement.appendChild(time);
+            }
+
+            return eventElement;
+        }
+
+        function createDayEventCard(event) {
+            const card = document.createElement('div');
+            card.className = 'day-event-card';
+            card.style.borderLeftColor = getEventColor(event, 'dark');
+
+            const info = document.createElement('div');
+            info.className = 'day-event-info';
+
+            const title = document.createElement('h3');
+            title.textContent = event.summary || event.title;
+
+            const calendar = document.createElement('p');
+            calendar.style.fontWeight = '600';
+            calendar.style.color = '#692c18';
+            calendar.textContent = event.calendarName || 'My Calendar';
+
+            const description = document.createElement('p');
+            if (event.description) {
+                description.textContent = event.description;
+            }
+
+            info.appendChild(title);
+            info.appendChild(calendar);
+            if (description.textContent) info.appendChild(description);
+
+            const time = document.createElement('div');
+            time.className = 'day-event-time';
+            if (event.start && event.start.dateTime) {
+                const startTime = new Date(event.start.dateTime);
+                const endTime = new Date(event.end.dateTime);
+                time.textContent = `${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            } else if (event.start && event.start.date) {
+                time.textContent = 'All Day';
+            }
+
+            card.appendChild(info);
+            if (time.textContent) card.appendChild(time);
+            return card;
+        }
+
+        // ===== UTILITY FUNCTIONS =====
         function getEventsForDate(date) {
-            const events = [];
             const dateStr = date.toISOString().split('T')[0];
-            const dayOfWeek = date.getDay();
-            
-            // Add class sessions
-            (currentUser.classSessions || []).forEach(session => {
-                if (session.daysOfWeek.includes(dayOfWeek)) {
-                    const sessionStart = new Date(session.startDate);
-                    const sessionEnd = new Date(session.endDate);
-                    if (date >= sessionStart && date <= sessionEnd) {
-                        const classInfo = currentUser.classes.find(c => c.id === session.classId);
-                        events.push({
-                            id: session.id,
-                            type: 'class',
-                            title: classInfo?.name || session.className,
-                            classId: session.classId,
-                            className: classInfo?.className,
-                            time: session.startTime + ' - ' + session.endTime,
-                            description: session.description
-                        });
-                    }
-                }
-            });
-            
-            // Add tasks/exams
-            (currentUser.tasks || []).forEach(task => {
-                if (task.dueDate === dateStr) {
-                    const classInfo = (currentUser.classes || []).find(c => c.id === task.classId);
-                    events.push({
-                        id: task.id,
-                        type: 'task',
-                        title: task.name,
-                        classId: task.classId,
-                        className: classInfo?.className,
-                        time: task.time || null,
-                        description: task.description
-                    });
-                }
-            });
-            
-            return events.sort((a, b) => {
-                if (a.time && b.time) {
-                    return a.time.localeCompare(b.time);
-                }
-                return 0;
+            return googleEvents.filter(event => {
+                if (!visibleCalendars.has(event.calendarId)) return false;
+
+                const eventStart = event.start.dateTime || event.start.date;
+                const eventDate = eventStart.split('T')[0];
+                return eventDate === dateStr;
             });
         }
 
-        function getEventsForDateAndTime(date, hour) {
-            const events = [];
-            const dayOfWeek = date.getDay();
-            
-            (currentUser.classSessions || []).forEach(session => {
-                if (session.daysOfWeek.includes(dayOfWeek)) {
-                    const sessionStart = new Date(session.startDate);
-                    const sessionEnd = new Date(session.endDate);
-                    if (date >= sessionStart && date <= sessionEnd) {
-                        const startHour = parseInt(session.startTime.split(':')[0]);
-                        if (startHour === hour) {
-                            const classInfo = currentUser.classes.find(c => c.id === session.classId);
-                            events.push({
-                                id: session.id,
-                                type: 'class',
-                                title: classInfo?.name || session.className,
-                                classId: session.classId,
-                                className: classInfo?.className,
-                                time: session.startTime + ' - ' + session.endTime,
-                                description: session.description
-                            });
-                        }
-                    }
+        function getEventColor(event, shade = 'dark') {
+            const calendar = googleCalendars.find(cal => cal.id === event.calendarId);
+            if (calendar) {
+                if (shade === 'light') {
+                    return calendar.backgroundColor || '#e5eaeb';
+                } else {
+                    return calendar.foregroundColor || '#824531';
                 }
-            });
-
-            return events;
+            }
+            return shade === 'light' ? '#e5eaeb' : '#824531';
         }
 
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day;
+            return new Date(d.setDate(diff));
+        }
+
+        function isToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+
+        // ===== EVENT MODAL =====
         function openAddEventModal() {
-            document.getElementById('eventType').value = '';
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventDescription').value = '';
-            document.getElementById('eventError').textContent = '';
-            document.getElementById('eventError').classList.remove('show');
+            if (!isAuthenticated) {
+                alert('Please sign in with Google to add events');
+                return;
+            }
             document.getElementById('eventModal').classList.add('active');
+            document.getElementById('eventDate').valueAsDate = currentDate;
         }
 
         function closeEventModal() {
             document.getElementById('eventModal').classList.remove('active');
+            document.getElementById('eventForm').reset();
         }
 
-        function updateEventForm() {
-            const eventType = document.getElementById('eventType').value;
-            const classScheduleSection = document.getElementById('classScheduleSection');
-            const eventDateSection = document.getElementById('eventDateSection');
-
-            if (eventType === 'class') {
-                classScheduleSection.style.display = 'block';
-                eventDateSection.style.display = 'none';
-            } else {
-                classScheduleSection.style.display = 'none';
-                eventDateSection.style.display = 'block';
-            }
-        }
-
-        function handleSaveEvent(event) {
-            event.preventDefault();
+        function handleSaveEvent(e) {
+            e.preventDefault();
             
-            const eventType = document.getElementById('eventType').value;
             const title = document.getElementById('eventTitle').value;
-            const classId = document.getElementById('eventClass').value;
+            const date = document.getElementById('eventDate').value;
+            const startTime = document.getElementById('eventStartTime').value;
+            const endTime = document.getElementById('eventEndTime').value;
             const description = document.getElementById('eventDescription').value;
-            const errorDiv = document.getElementById('eventError');
-            const successDiv = document.getElementById('eventSuccess');
+            const calendarId = document.getElementById('eventCalendar').value;
 
-            errorDiv.classList.remove('show');
-            successDiv.classList.remove('show');
-
-            if (!eventType || !title) {
-                errorDiv.textContent = 'Please fill in all required fields';
-                errorDiv.classList.add('show');
+            if (!calendarId) {
+                showError('Please select a calendar');
                 return;
             }
 
-            if (eventType === 'class') {
-                const daysOfWeek = [];
-                ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach((day, index) => {
-                    if (document.getElementById(day).checked) {
-                        daysOfWeek.push(index === 6 ? 0 : index + 1);
-                    }
-                });
+            updateSyncStatus('Creating event...', 'syncing');
 
-                if (daysOfWeek.length === 0) {
-                    errorDiv.textContent = 'Please select at least one day of the week';
-                    errorDiv.classList.add('show');
-                    return;
+            const event = {
+                summary: title,
+                description: description,
+                start: {
+                    dateTime: startTime ? new Date(`${date}T${startTime}:00`).toISOString() : new Date(date).toISOString(),
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                },
+                end: {
+                    dateTime: endTime ? new Date(`${date}T${endTime}:00`).toISOString() : new Date(new Date(date).getTime() + 3600000).toISOString(),
+                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 }
+            };
 
-                const startTime = document.getElementById('classStartTime').value;
-                const endTime = document.getElementById('classEndTime').value;
-                const startDate = document.getElementById('classStartDate').value;
-                const endDate = document.getElementById('classEndDate').value;
-
-                if (!startTime || !endTime || !startDate || !endDate) {
-                    errorDiv.textContent = 'Please fill in all class schedule fields';
-                    errorDiv.classList.add('show');
-                    return;
-                }
-
-                const session = {
-                    id: `session_${Date.now()}`,
-                    className: title,
-                    classId: classId || null,
-                    daysOfWeek: daysOfWeek.sort(),
-                    startTime: startTime,
-                    endTime: endTime,
-                    startDate: startDate,
-                    endDate: endDate,
-                    description: description,
-                    createdAt: new Date().getTime()
-                };
-
-                if (!currentUser.classSessions) currentUser.classSessions = [];
-                currentUser.classSessions.push(session);
-
-            } else {
-                const dueDate = document.getElementById('eventDate').value;
-                const time = document.getElementById('eventTime').value;
-
-                if (!dueDate) {
-                    errorDiv.textContent = 'Please select a date';
-                    errorDiv.classList.add('show');
-                    return;
-                }
-
-                const task = {
-                    id: `task_${Date.now()}`,
-                    name: title,
-                    classId: classId || null,
-                    dueDate: dueDate,
-                    time: time || null,
-                    description: description,
-                    completed: false,
-                    createdAt: new Date().getTime()
-                };
-
-                if (!currentUser.tasks) currentUser.tasks = [];
-                currentUser.tasks.push(task);
-            }
-
-            saveUserData();
-            successDiv.textContent = 'Event saved successfully!';
-            successDiv.classList.add('show');
-
-            setTimeout(() => {
+            gapi.client.calendar.events.insert({
+                calendarId: calendarId,
+                resource: event
+            }).then(function(response) {
+                showSuccess('Event created successfully!');
                 closeEventModal();
-                renderCalendar();
-            }, 1500);
+                loadGoogleEvents();
+            }).catch(function(error) {
+                console.error('Error creating event:', error);
+                showError('Failed to create event. Please try again.');
+                updateSyncStatus('Failed to create event', 'error');
+            });
         }
 
-        function populateEventClassSelect() {
-            const select = document.getElementById('eventClass');
-            const classes = currentUser.classes || [];
-            const options = classes.map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
-            select.innerHTML = '<option value="">No class (Personal/Extracurricular)</option>' + options;
+        function showError(message) {
+            const errorEl = document.getElementById('eventError');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => errorEl.classList.remove('show'), 5000);
         }
 
-        function previousPeriod() {
-            if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() - 7);
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() - 1);
-            } else {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-            }
-            renderCalendar();
-        }
-
-        function nextPeriod() {
-            if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() + 7);
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() + 1);
-            } else {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            }
-            renderCalendar();
+        function showSuccess(message) {
+            const successEl = document.getElementById('eventSuccess');
+            successEl.textContent = message;
+            successEl.classList.add('show');
+            setTimeout(() => successEl.classList.remove('show'), 5000);
         }
 
         function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'landingpage.html';
+            const auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut();
         }
     </script>
 </body>

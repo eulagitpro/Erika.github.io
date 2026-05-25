@@ -298,19 +298,39 @@
             background: #e5eaeb;
             padding: 0.5rem 0.8rem;
             border-radius: 4px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             margin-bottom: 0.5rem;
             border-left: 3px solid #824531;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            white-space: normal;
+            word-wrap: break-word;
             cursor: pointer;
             transition: all 0.3s ease;
+            max-height: 3.5em;
+            line-height: 1.3;
         }
 
         .event-item:hover {
             transform: translateX(3px);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-title {
+            font-weight: 600;
+            color: #191817;
+        }
+
+        .event-class {
+            font-size: 0.7rem;
+            color: #8c8c8c;
+            margin-top: 0.2rem;
+        }
+
+        .event-time {
+            font-size: 0.7rem;
+            color: #692c18;
+            font-weight: 500;
         }
 
         .week-view {
@@ -349,20 +369,46 @@
             font-weight: 600;
         }
 
+        .week-cell {
+            background: #ffffff;
+            min-height: 80px;
+            padding: 0.3rem;
+            overflow: hidden;
+        }
+
         .week-event {
             background: #e5eaeb;
             border-left: 3px solid #824531;
-            padding: 0.6rem;
-            font-size: 0.8rem;
-            border-radius: 4px;
-            margin: 0.3rem;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 3px;
+            margin: 0.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
         }
 
         .week-event:hover {
             transform: scale(1.02);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .week-event-title {
+            font-weight: 600;
+            color: #191817;
+        }
+
+        .week-event-class {
+            font-size: 0.65rem;
+            color: #8c8c8c;
+        }
+
+        .week-event-time {
+            font-size: 0.65rem;
+            color: #692c18;
+            font-weight: 500;
         }
 
         .day-view {
@@ -419,10 +465,18 @@
             margin-bottom: 0.3rem;
         }
 
+        .day-event-class {
+            color: #692c18;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
         .day-event-time {
             font-weight: 600;
             color: #824531;
             white-space: nowrap;
+            font-size: 0.9rem;
         }
 
         .event-actions {
@@ -608,24 +662,6 @@
             background: #e5eaeb;
         }
 
-        .add-event-btn {
-            background: #824531;
-            color: #ffffff;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-
-        .add-event-btn:hover {
-            background: #692c18;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(130, 69, 49, 0.3);
-        }
-
         .error-message {
             background: #f44336;
             color: #ffffff;
@@ -667,6 +703,44 @@
             }
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .time-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .time-option input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .time-option label {
+            margin: 0;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+        .time-inputs {
+            display: none;
+        }
+
+        .time-inputs.show {
+            display: grid;
+        }
+
+        .optional-label {
+            font-size: 0.8rem;
+            color: #8c8c8c;
+            margin-top: 0.2rem;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -694,6 +768,10 @@
 
             .event-actions {
                 width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -764,9 +842,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="eventClass">Class</label>
-                        <select id="eventClass" required>
-                            <option value="">Select a class...</option>
+                        <label for="eventClass">Class (Optional)</label>
+                        <select id="eventClass">
+                            <option value="">No class (Personal/Extracurricular)</option>
                         </select>
                     </div>
 
@@ -776,17 +854,32 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="eventStartTime">Start Time</label>
-                        <input type="time" id="eventStartTime">
+                        <label>Time Options</label>
+                        <div class="time-option">
+                            <input type="radio" id="allDay" name="timeType" value="allDay" checked onchange="toggleTimeInputs()">
+                            <label for="allDay">All Day Event</label>
+                        </div>
+                        <div class="time-option">
+                            <input type="radio" id="timedEvent" name="timeType" value="timed" onchange="toggleTimeInputs()">
+                            <label for="timedEvent">Specific Time</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group time-inputs" id="timeInputsGroup">
+                        <div class="form-row">
+                            <div>
+                                <label for="eventStartTime">Start Time</label>
+                                <input type="time" id="eventStartTime">
+                            </div>
+                            <div>
+                                <label for="eventEndTime">End Time</label>
+                                <input type="time" id="eventEndTime">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="eventEndTime">End Time</label>
-                        <input type="time" id="eventEndTime">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="eventDescription">Description</label>
+                        <label for="eventDescription">Description (Optional)</label>
                         <textarea id="eventDescription" placeholder="Add event details..." rows="4"></textarea>
                     </div>
 
@@ -906,6 +999,17 @@
             renderCalendar();
         }
 
+        function toggleTimeInputs() {
+            const timedOption = document.getElementById('timedEvent').checked;
+            const timeInputsGroup = document.getElementById('timeInputsGroup');
+            
+            if (timedOption) {
+                timeInputsGroup.classList.add('show');
+            } else {
+                timeInputsGroup.classList.remove('show');
+            }
+        }
+
         function renderCalendar() {
             if (currentView === 'month') {
                 renderMonthView();
@@ -981,7 +1085,16 @@
                 const eventEl = document.createElement('div');
                 eventEl.className = 'event-item';
                 eventEl.style.borderLeftColor = getClassColor(event.classId);
-                eventEl.textContent = event.title;
+                
+                let eventHTML = `<div class="event-title">${event.title}</div>`;
+                if (event.classId) {
+                    eventHTML += `<div class="event-class">${getClassName(event.classId)}</div>`;
+                }
+                if (event.startTime) {
+                    eventHTML += `<div class="event-time">${event.startTime}</div>`;
+                }
+                
+                eventEl.innerHTML = eventHTML;
                 eventEl.onclick = () => showEventDetails(event);
                 cell.appendChild(eventEl);
             });
@@ -989,115 +1102,65 @@
             return cell;
         }
 
-            function renderWeekView() {
-              // Compute start and end of the current week (Sunday->Saturday)
-              const weekStart = new Date(currentDate);
-              weekStart.setDate(currentDate.getDate() - currentDate.getDay()); // Sunday
-              const weekEnd = new Date(weekStart);
-              weekEnd.setDate(weekStart.getDate() + 6); // Saturday
-      
-              // Show ranges in the header
-              document.getElementById('currentDate').textContent =
-                  `${monthNames[weekStart.getMonth()]} ${weekStart.getDate()} - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
-      
-              // Build headers for week grid
-              const weekGrid = document.getElementById('weekGrid');
-              weekGrid.innerHTML = '';
-      
-              // Row 1: Day names and dates (columns: empty, then Sun-Sat)
-              let headers = `<div></div>`; // Time label cell (empty for column 0)
-              let dates = [];
-      
-              for (let i = 0; i < 7; i++) {
-                  const thisDate = new Date(weekStart);
-                  thisDate.setDate(weekStart.getDate() + i);
-                  dates.push(thisDate); // For day columns
-                  headers += `<div class="week-header">${dayNames[thisDate.getDay()].substr(0,3)}<br>${monthNames[thisDate.getMonth()].substr(0,3)} ${thisDate.getDate()}</div>`;
-              }
-              weekGrid.innerHTML += headers;
-      
-              // Time slots (8 AM to 7 PM)
-              // You can adjust the hours as needed (add more if you want)
-              const hours = [];
-              for (let h = 8; h <= 19; h++) hours.push(h);
-      
-              // Create a map date->array of events happening during the week
-              function getEventsForDay(d, includeTasks=true) {
-                  const result = [];
-                  (currentUser.classes || []).forEach(cls => {
-                      if (!visibleClasses.has(cls.id)) return;
-                      // Deadlines (no time; plot on all-day slot)
-                      (cls.deadlines || []).forEach(deadline => {
-                          const dDate = new Date(deadline.date);
-                          if (dDate.toDateString() === d.toDateString())
-                              result.push({ ...deadline, classId: cls.id, type: 'deadline' });
-                      });
-                      // Meetings
-                      (cls.meetings || []).forEach(meeting => {
-                          const mDate = new Date(meeting.date);
-                          if (mDate.toDateString() === d.toDateString())
-                              result.push({ ...meeting, classId: cls.id, type: 'meeting' });
-                      });
-                  });
-                  if (includeTasks) {
-                      (currentUser.tasks || []).forEach(task => {
-                          const taskDate = new Date(task.dueDate || task.date);
-                          if (taskDate.toDateString() === d.toDateString())
-                              result.push({ ...task, type: 'task' });
-                      });
-                  }
-                  return result;
-              }
-      
-              // --- All-day row ---
-              let allDayRow = '<div class="time-label">All day</div>';
-              for (let i = 0; i < 7; i++) {
-                  // Collect deadlines and all-day tasks for this day
-                  const events = getEventsForDay(dates[i]).filter(ev => !ev.startTime);
-                  if (events.length === 0) {
-                      allDayRow += `<div class="day-cell"></div>`;
-                  } else {
-                      allDayRow += `<div class="day-cell">` +
-                          events.map(ev => `
-                              <div class="event-item"
-                                   style="border-left-color:${getClassColor(ev.classId)}"
-                                   onclick="showEventDetails(${JSON.stringify({ id:ev.id, type:ev.type, classId:ev.classId }).replace(/"/g,'&quot;') })">
-                                  ${ev.title}
-                              </div>`
-                          ).join('')
-                          + `</div>`;
-                  }
-              }
-              weekGrid.innerHTML += allDayRow;
-      
-              // --- Hourly rows: 8:00 to 19:00 ---
-              for (let h of hours) {
-                  let hourLabel = (h < 12 ? `${h} AM` : (h == 12 ? "12 PM" : `${h-12} PM`));
-                  let hourRow = `<div class="time-label">${hourLabel}</div>`;
-                  for (let d = 0; d < 7; d++) {
-                      // Get meetings and timed tasks in this slot
-                      const cellEvents = getEventsForDay(dates[d], false).filter(ev => ev.startTime &&
-                          (parseInt(ev.startTime.split(':')[0]) === h));
-                      // For each: show as .week-event
-                      if (cellEvents.length === 0) {
-                          hourRow += `<div class="day-cell"></div>`;
-                      } else {
-                          hourRow += `<div class="day-cell">` +
-                              cellEvents.map(ev => `
-                                  <div class="week-event"
-                                       style="border-left-color:${getClassColor(ev.classId)}"
-                                       onclick="showEventDetails(${JSON.stringify({ id:ev.id, type:ev.type, classId:ev.classId }).replace(/"/g,'&quot;') })">
-                                      ${ev.title}
-                                      <br>
-                                      <small>${ev.startTime || ''}${ev.endTime ? ' - ' + ev.endTime : ''}</small>
-                                  </div>`
-                              ).join('')
-                              + `</div>`;
-                      }
-                  }
-                  weekGrid.innerHTML += hourRow;
-              }
-          }
+        function renderWeekView() {
+            const weekStart = new Date(currentDate);
+            weekStart.setDate(currentDate.getDate() - currentDate.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+
+            document.getElementById('currentDate').textContent = 
+                `${monthNames[weekStart.getMonth()]} ${weekStart.getDate()} - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}`;
+
+            const weekGrid = document.getElementById('weekGrid');
+            weekGrid.innerHTML = '';
+
+            // Week header row
+            let headers = `<div></div>`;
+            let dates = [];
+            for (let i = 0; i < 7; i++) {
+                const thisDate = new Date(weekStart);
+                thisDate.setDate(weekStart.getDate() + i);
+                dates.push(thisDate);
+                headers += `<div class="week-header">${dayNames[thisDate.getDay()].substr(0,3)}<br>${thisDate.getDate()}</div>`;
+            }
+            weekGrid.innerHTML += headers;
+
+            // All-day row
+            let allDayRow = '<div class="time-label">All day</div>';
+            for (let i = 0; i < 7; i++) {
+                const events = getEventsForDate(dates[i]).filter(ev => !ev.startTime);
+                allDayRow += `<div class="week-cell">` +
+                    events.map(ev => `
+                        <div class="week-event" style="border-left-color:${getClassColor(ev.classId)}" onclick="showEventDetails(${JSON.stringify({id:ev.id, type:ev.type, classId:ev.classId}).replace(/"/g,'&quot;')})">
+                            <div class="week-event-title">${ev.title}</div>
+                            ${ev.classId ? `<div class="week-event-class">${getClassName(ev.classId)}</div>` : ''}
+                        </div>`
+                    ).join('') + `</div>`;
+            }
+            weekGrid.innerHTML += allDayRow;
+
+            // Time slots
+            const hours = [];
+            for (let h = 8; h <= 19; h++) hours.push(h);
+
+            for (let h of hours) {
+                let hourLabel = (h < 12 ? `${h} AM` : (h == 12 ? "12 PM" : `${h-12} PM`));
+                let hourRow = `<div class="time-label">${hourLabel}</div>`;
+                for (let d = 0; d < 7; d++) {
+                    const cellEvents = getEventsForDate(dates[d]).filter(ev => ev.startTime &&
+                        (parseInt(ev.startTime.split(':')[0]) === h));
+                    hourRow += `<div class="week-cell">` +
+                        cellEvents.map(ev => `
+                            <div class="week-event" style="border-left-color:${getClassColor(ev.classId)}" onclick="showEventDetails(${JSON.stringify({id:ev.id, type:ev.type, classId:ev.classId}).replace(/"/g,'&quot;')})">
+                                <div class="week-event-title">${ev.title}</div>
+                                ${ev.classId ? `<div class="week-event-class">${getClassName(ev.classId)}</div>` : ''}
+                                <div class="week-event-time">${ev.startTime}${ev.endTime ? ' - ' + ev.endTime : ''}</div>
+                            </div>`
+                        ).join('') + `</div>`;
+                }
+                weekGrid.innerHTML += hourRow;
+            }
+        }
 
         function renderDayView() {
             document.getElementById('dayViewHeader').textContent = 
@@ -1118,11 +1181,11 @@
                 <div class="day-event-card">
                     <div class="day-event-info">
                         <h3>${event.title}</h3>
-                        <p>${getClassName(event.classId)}</p>
+                        ${event.classId ? `<div class="day-event-class">${getClassName(event.classId)}</div>` : ''}
                         ${event.description ? `<p>${event.description}</p>` : ''}
                     </div>
                     <div class="day-event-time">
-                        ${event.startTime || 'All day'}
+                        ${event.startTime ? `${event.startTime}${event.endTime ? ' - ' + event.endTime : ''}` : 'All day'}
                     </div>
                     <div class="event-actions">
                         <button class="edit-btn" onclick="editEvent('${event.id}', '${event.type}', '${event.classId}')">Edit</button>
@@ -1177,6 +1240,8 @@
                         title: task.title,
                         classId: task.classId || '',
                         date: task.dueDate || task.date,
+                        startTime: task.startTime || '',
+                        endTime: task.endTime || '',
                         type: 'task',
                         description: task.description
                     });
@@ -1188,7 +1253,7 @@
                 if (!b.startTime) return -1;
                 return a.startTime.localeCompare(b.startTime);
             });
-            }
+        }
 
         function getClassName(classId) {
             const cls = (currentUser.classes || []).find(c => c.id === classId);
@@ -1228,7 +1293,7 @@
             const classSelect = document.getElementById('eventClass');
             const classes = currentUser.classes || [];
             
-            classSelect.innerHTML = '<option value="">Select a class...</option>' + 
+            classSelect.innerHTML = '<option value="">No class (Personal/Extracurricular)</option>' + 
                 classes.map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
         }
 
@@ -1245,6 +1310,9 @@
             document.getElementById('eventStartTime').value = '';
             document.getElementById('eventEndTime').value = '';
             document.getElementById('eventDescription').value = '';
+            document.getElementById('allDay').checked = true;
+            document.getElementById('timedEvent').checked = false;
+            document.getElementById('timeInputsGroup').classList.remove('show');
             document.getElementById('eventModal').classList.add('active');
         }
 
@@ -1264,6 +1332,7 @@
             const startTime = document.getElementById('eventStartTime').value;
             const endTime = document.getElementById('eventEndTime').value;
             const description = document.getElementById('eventDescription').value.trim();
+            const isAllDay = document.getElementById('allDay').checked;
             const errorDiv = document.getElementById('eventError');
 
             errorDiv.classList.remove('show');
@@ -1274,53 +1343,76 @@
                 return;
             }
 
-            if (!classId) {
-                errorDiv.textContent = 'Please select a class.';
-                errorDiv.classList.add('show');
-                return;
-            }
-
             if (!date) {
                 errorDiv.textContent = 'Please select a date.';
                 errorDiv.classList.add('show');
                 return;
             }
 
-            const selectedClass = currentUser.classes.find(c => c.id === classId);
-            if (!selectedClass) {
-                errorDiv.textContent = 'Selected class not found.';
+            if (!isAllDay && !startTime) {
+                errorDiv.textContent = 'Please enter a start time for timed events.';
                 errorDiv.classList.add('show');
                 return;
             }
 
             if (editingEventId) {
-                const eventIndex = selectedClass[editingEventType + 's'].findIndex(e => e.id === editingEventId);
-                if (eventIndex !== -1) {
-                    selectedClass[editingEventType + 's'][eventIndex] = {
-                        id: editingEventId,
-                        title,
-                        date,
-                        startTime,
-                        endTime,
-                        description
-                    };
+                // Editing existing event
+                if (classId) {
+                    const selectedClass = currentUser.classes.find(c => c.id === classId);
+                    if (selectedClass) {
+                        const eventIndex = (selectedClass[editingEventType + 's'] || []).findIndex(e => e.id === editingEventId);
+                        if (eventIndex !== -1) {
+                            selectedClass[editingEventType + 's'][eventIndex] = {
+                                id: editingEventId,
+                                title,
+                                date,
+                                startTime: isAllDay ? '' : startTime,
+                                endTime: isAllDay ? '' : endTime,
+                                description
+                            };
+                        }
+                    }
+                } else if (editingEventType === 'task') {
+                    const taskIndex = currentUser.tasks.findIndex(t => t.id === editingEventId);
+                    if (taskIndex !== -1) {
+                        currentUser.tasks[taskIndex] = {
+                            id: editingEventId,
+                            title,
+                            classId: '',
+                            date,
+                            startTime: isAllDay ? '' : startTime,
+                            endTime: isAllDay ? '' : endTime,
+                            description
+                        };
+                    }
                 }
             } else {
+                // Creating new event
                 const newEvent = {
                     id: `event_${Date.now()}`,
                     title,
                     date,
-                    startTime,
-                    endTime,
+                    startTime: isAllDay ? '' : startTime,
+                    endTime: isAllDay ? '' : endTime,
                     description
                 };
 
-                if (startTime || endTime) {
-                    if (!selectedClass.meetings) selectedClass.meetings = [];
-                    selectedClass.meetings.push(newEvent);
+                if (classId) {
+                    const selectedClass = currentUser.classes.find(c => c.id === classId);
+                    if (selectedClass) {
+                        if (isAllDay) {
+                            if (!selectedClass.deadlines) selectedClass.deadlines = [];
+                            selectedClass.deadlines.push(newEvent);
+                        } else {
+                            if (!selectedClass.meetings) selectedClass.meetings = [];
+                            selectedClass.meetings.push(newEvent);
+                        }
+                    }
                 } else {
-                    if (!selectedClass.deadlines) selectedClass.deadlines = [];
-                    selectedClass.deadlines.push(newEvent);
+                    // Personal task (no class)
+                    newEvent.classId = '';
+                    if (!currentUser.tasks) currentUser.tasks = [];
+                    currentUser.tasks.push(newEvent);
                 }
             }
 
@@ -1334,15 +1426,17 @@
             editingEventType = type;
             editingEventClassId = classId;
             
-            const selectedClass = currentUser.classes.find(c => c.id === classId);
             let eventData = null;
 
             if (type === 'task') {
                 eventData = currentUser.tasks.find(t => t.id === eventId);
-            } else if (type === 'deadline') {
-                eventData = selectedClass.deadlines.find(e => e.id === eventId);
-            } else if (type === 'meeting') {
-                eventData = selectedClass.meetings.find(e => e.id === eventId);
+            } else if (classId) {
+                const selectedClass = currentUser.classes.find(c => c.id === classId);
+                if (type === 'deadline') {
+                    eventData = selectedClass.deadlines.find(e => e.id === eventId);
+                } else if (type === 'meeting') {
+                    eventData = selectedClass.meetings.find(e => e.id === eventId);
+                }
             }
 
             if (eventData) {
@@ -1350,9 +1444,20 @@
                 document.getElementById('eventTitle').value = eventData.title;
                 document.getElementById('eventClass').value = classId;
                 document.getElementById('eventDate').value = eventData.date;
-                document.getElementById('eventStartTime').value = eventData.startTime || '';
-                document.getElementById('eventEndTime').value = eventData.endTime || '';
                 document.getElementById('eventDescription').value = eventData.description || '';
+                
+                if (eventData.startTime) {
+                    document.getElementById('timedEvent').checked = true;
+                    document.getElementById('allDay').checked = false;
+                    document.getElementById('eventStartTime').value = eventData.startTime;
+                    document.getElementById('eventEndTime').value = eventData.endTime || '';
+                    document.getElementById('timeInputsGroup').classList.add('show');
+                } else {
+                    document.getElementById('allDay').checked = true;
+                    document.getElementById('timedEvent').checked = false;
+                    document.getElementById('timeInputsGroup').classList.remove('show');
+                }
+                
                 document.getElementById('eventError').classList.remove('show');
                 document.getElementById('eventSuccess').classList.remove('show');
                 document.getElementById('eventModal').classList.add('active');
@@ -1364,22 +1469,23 @@
                 return;
             }
 
-            const selectedClass = currentUser.classes.find(c => c.id === classId);
-
             if (type === 'task') {
                 const taskIndex = currentUser.tasks.findIndex(t => t.id === eventId);
                 if (taskIndex !== -1) {
                     currentUser.tasks.splice(taskIndex, 1);
                 }
-            } else if (type === 'deadline') {
-                const deadlineIndex = selectedClass.deadlines.findIndex(e => e.id === eventId);
-                if (deadlineIndex !== -1) {
-                    selectedClass.deadlines.splice(deadlineIndex, 1);
-                }
-            } else if (type === 'meeting') {
-                const meetingIndex = selectedClass.meetings.findIndex(e => e.id === eventId);
-                if (meetingIndex !== -1) {
-                    selectedClass.meetings.splice(meetingIndex, 1);
+            } else if (classId) {
+                const selectedClass = currentUser.classes.find(c => c.id === classId);
+                if (type === 'deadline') {
+                    const deadlineIndex = selectedClass.deadlines.findIndex(e => e.id === eventId);
+                    if (deadlineIndex !== -1) {
+                        selectedClass.deadlines.splice(deadlineIndex, 1);
+                    }
+                } else if (type === 'meeting') {
+                    const meetingIndex = selectedClass.meetings.findIndex(e => e.id === eventId);
+                    if (meetingIndex !== -1) {
+                        selectedClass.meetings.splice(meetingIndex, 1);
+                    }
                 }
             }
 

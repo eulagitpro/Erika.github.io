@@ -1,0 +1,41 @@
+                    <div class="form-group">
+                        <label for="taskName">Task Name</label>
+                        <input type="text" id="taskName" placeholder="e.g., Complete Assignment 3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskClass">Class (Optional)</label>
+                        <select id="taskClass">
+                            <option value="">No class (Personal/Extracurricular)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" id="taskDueDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Options</label>
+                        <div class="time-option">
+                            <input type="radio" id="taskAllDay" name="taskTimeType" value="allDay" checked onchange="toggleTaskTimeInputs()">
+                            <label for="taskAllDay">All Day</label>
+                        </div>
+                        <div class="time-option">
+                            <input type="radio" id="taskTimed" name="taskTimeType" value="timed" onchange="toggleTaskTimeInputs()">
+                            <label for="taskTimed">Specific Time</label>
+                        </div>
+                    </div>
+                    <div class="form-group time-inputs" id="taskTimeInputsGroup">
+                        <div class="form-row">
+                            <div>
+                                <label for="taskStartTime">Start Time</label>
+                                <input type="time" id="taskStartTime">
+                            </div>
+                            <div>
+                                <label for="taskEndTime">End Time</label>
+                                <input type="time" id="taskEndTime">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description</label>
+                        <textarea id="taskDescription" placeholder="Add details about this task..." rows="3"></textarea>
+                    </div>

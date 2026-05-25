@@ -348,6 +348,15 @@
             background: #a8bfc8;
         }
 
+        .quick-action-btn.danger {
+            background: #f44336;
+            color: #ffffff;
+        }
+
+        .quick-action-btn.danger:hover {
+            background: #da190b;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -655,6 +664,10 @@
                     <p style="color: #8c8c8c; font-size: 0.9rem;">No upcoming deadlines</p>
                 </div>
             </div>
+
+            <div class="sidebar-card">
+                <button class="quick-action-btn danger" onclick="clearCompletedTasks()">🗑️ Clear Completed</button>
+            </div>
         </div>
     </div>
 
@@ -884,6 +897,24 @@
                 displayPendingTasks();
             }
         }
+
+        function clearCompletedTasks() {
+            const completedCount = (currentUser.tasks || []).filter(t => t.completed).length;
+            
+            if (completedCount === 0) {
+                alert('No completed tasks to clear.');
+                return;
+            }
+
+            if (confirm(`Delete ${completedCount} completed task${completedCount !== 1 ? 's' : ''}?`)) {
+                currentUser.tasks = (currentUser.tasks || []).filter(t => !t.completed);
+                saveUserData();
+                displayStats();
+                displayPendingTasks();
+                displaySummary();
+                alert(`Deleted ${completedCount} completed task${completedCount !== 1 ? 's' : ''}.`);
+            }
+        }
         
         function displaySummary() {
             const tasks = currentUser.tasks || [];
@@ -1000,8 +1031,15 @@
             select.innerHTML = '<option value="">Select a class...</option>' + options;
         }
 
+        // Modal functions
         function openChatModal() {
             document.getElementById('chatModal').classList.add('active');
+            window.botpressWebChat.sendEvent({
+                type: 'trigger',
+                payload: {
+                    code: 'main_chatbot'
+                }
+            });
         }
 
         function closeChatModal() {
@@ -1009,22 +1047,94 @@
         }
 
         function openAddClassModal() {
-            editingClassId = null;
-            document.getElementById('classModalTitle').textContent = 'Add New Class';
-            document.getElementById('className').value = '';
-            document.getElementById('classCode').value = '';
-            document.getElementById('classColor').value = '#824531';
-            document.getElementById('classInstructor').value = '';
-            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
-            document.getElementById('classStartTime').value = '';
-            document.getElementById('classEndTime').value = '';
-            document.getElementById('classError').textContent = '';
-            document.getElementById('classError').classList.remove('show');
             document.getElementById('addClassModal').classList.add('active');
         }
 
         function closeAddClassModal() {
             document.getElementById('addClassModal').classList.remove('active');
+            document.getElementById('classError').classList.remove('show');
+            document.getElementById('className').value = '';
+            document.getElementById('classCode').value = '';
+            document.getElementById('classColor').value = '#824531';
+            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
+            document.getElementById('classStartTime').value = '';
+            document.getElementById('classEndTime').value = '';
+            document.getElementById('classInstructor').value = '';
+        }
+
+        function openAddTaskModal() {
+            document.getElementById('addTaskModal').classList.add('active');
+        }
+
+        function closeAddTaskModal() {
+            document.getElementById('addTaskModal').classList.remove('active');
+            document.getElementById('taskError').classList.remove('show');
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskClass').value = '';
+            document.getElementById('taskDueDate').value = '';
+            document.getElementById('taskDescription').value = '';
+        }
+
+        function handleSaveClass(e) {
+            e.preventDefault();
+            const classId = editingClassId || 'class_' + Date.now();
+            const selectedDays = Array.from(document.querySelectorAll('.schedule-day:checked')).map(cb => cb.value);
+            
+            const classObj = {
+                id: classId,
+                name: document.getElementById('className').value,
+                code: document.getElementById('classCode').value,
+                color: document.getElementById('classColor').value,
+                schedule: {
+                    days: selectedDays,
+                    startTime: document.getElementById('classStartTime').value || 'N/A',
+                    endTime: document.getElementById('classEndTime').value || 'N/A'
+                },
+                instructor: document.getElementById('classInstructor').value
+            };
+
+            if (!currentUser.classes) currentUser.classes = [];
+            
+            if (editingClassId) {
+                const index = currentUser.classes.findIndex(c => c.id === editingClassId);
+                if (index !== -1) {
+                    currentUser.classes[index] = classObj;
+                }
+            } else {
+                currentUser.classes.push(classObj);
+            }
+
+            saveUserData();
+            displayStats();
+            displayClasses();
+            populateClassSelect();
+            closeAddClassModal();
+            editingClassId = null;
+        }
+
+        function handleSaveTask(e) {
+            e.preventDefault();
+            const taskId = 'task_' + Date.now();
+            
+            const taskObj = {
+                id: taskId,
+                name: document.getElementById('taskName').value,
+                classId: document.getElementById('taskClass').value,
+                dueDate: document.getElementById('taskDueDate').value,
+                description: document.getElementById('taskDescription').value,
+                completed: false,
+                createdAt: Date.now()
+            };
+
+            if (!currentUser.tasks) currentUser.tasks = [];
+            currentUser.tasks.push(taskObj);
+
+            saveUserData();
+            displayStats();
+            displayPendingTasks();
+            displaySummary();
+            displayUpcomingDeadlines();
+            closeAddTaskModal();
         }
 
         function editClass(classId) {
@@ -1034,125 +1144,22 @@
             editingClassId = classId;
             document.getElementById('classModalTitle').textContent = 'Edit Class';
             document.getElementById('className').value = cls.name;
-            document.getElementById('classCode').value = cls.code || '';
-            document.getElementById('classColor').value = cls.color || '#824531';
+            document.getElementById('classCode').value = cls.code;
+            document.getElementById('classColor').value = cls.color;
+            document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
+            document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
             document.getElementById('classInstructor').value = cls.instructor || '';
             
             document.querySelectorAll('.schedule-day').forEach(cb => {
                 cb.checked = (cls.schedule?.days || []).includes(cb.value);
             });
-            
-            document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
-            document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
-            document.getElementById('classError').textContent = '';
-            document.getElementById('classError').classList.remove('show');
-            document.getElementById('addClassModal').classList.add('active');
-        }
 
-        function handleSaveClass(event) {
-            event.preventDefault();
-            const name = document.getElementById('className').value;
-            const code = document.getElementById('classCode').value;
-            const color = document.getElementById('classColor').value;
-            const instructor = document.getElementById('classInstructor').value;
-            const startTime = document.getElementById('classStartTime').value;
-            const endTime = document.getElementById('classEndTime').value;
-            const days = Array.from(document.querySelectorAll('.schedule-day:checked')).map(cb => cb.value);
-            const errorDiv = document.getElementById('classError');
-
-            errorDiv.classList.remove('show');
-
-            if (!name || !code) {
-                errorDiv.textContent = 'Class name and code are required';
-                errorDiv.classList.add('show');
-                return;
-            }
-
-            if (editingClassId) {
-                const cls = (currentUser.classes || []).find(c => c.id === editingClassId);
-                if (cls) {
-                    cls.name = name;
-                    cls.code = code;
-                    cls.color = color;
-                    cls.instructor = instructor;
-                    cls.schedule = { days, startTime, endTime };
-                }
-            } else {
-                const newClass = {
-                    id: `class_${Date.now()}`,
-                    name,
-                    code,
-                    color,
-                    instructor,
-                    schedule: { days, startTime, endTime },
-                    deadlines: [],
-                    meetings: []
-                };
-                if (!currentUser.classes) currentUser.classes = [];
-                currentUser.classes.push(newClass);
-            }
-
-            saveUserData();
-            closeAddClassModal();
-            displayStats();
-            displayClasses();
-            populateClassSelect();
-        }
-
-        function openAddTaskModal() {
-            document.getElementById('taskName').value = '';
-            document.getElementById('taskClass').value = '';
-            document.getElementById('taskDueDate').value = '';
-            document.getElementById('taskDescription').value = '';
-            document.getElementById('taskError').textContent = '';
-            document.getElementById('taskError').classList.remove('show');
-            document.getElementById('addTaskModal').classList.add('active');
-        }
-
-        function closeAddTaskModal() {
-            document.getElementById('addTaskModal').classList.remove('active');
-        }
-
-        function handleSaveTask(event) {
-            event.preventDefault();
-            const name = document.getElementById('taskName').value;
-            const classId = document.getElementById('taskClass').value;
-            const dueDate = document.getElementById('taskDueDate').value;
-            const description = document.getElementById('taskDescription').value;
-            const errorDiv = document.getElementById('taskError');
-
-            errorDiv.classList.remove('show');
-
-            if (!name || !classId || !dueDate) {
-                errorDiv.textContent = 'All fields are required';
-                errorDiv.classList.add('show');
-                return;
-            }
-
-            const newTask = {
-                id: `task_${Date.now()}`,
-                name,
-                classId,
-                dueDate,
-                description,
-                completed: false,
-                createdAt: new Date().getTime()
-            };
-
-            if (!currentUser.tasks) currentUser.tasks = [];
-            currentUser.tasks.push(newTask);
-
-            saveUserData();
-            closeAddTaskModal();
-            displayStats();
-            displayPendingTasks();
-            displaySummary();
-            displayUpcomingDeadlines();
+            openAddClassModal();
         }
 
         function logout() {
             localStorage.removeItem('currentUser');
-            window.location.href = 'landingpage.html';
+            window.location.href = 'signin.html';
         }
     </script>
 </body>

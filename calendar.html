@@ -802,7 +802,13 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
+
+        /* Dynamic class styles will be injected here */
+        #dynamicStyles {
+            display: none;
+        }
     </style>
+    <div id="dynamicStyles"></div>
 </head>
 <body>
     <header>
@@ -1002,55 +1008,87 @@
                 className: 'faa'
             },
             {
-                id: 'math61',
-                name: 'MATH 61.2',
-                code: 'MATH 61.2',
+                id: 'math201',
+                name: 'Math 201',
+                code: 'Math 201',
                 color: '#b366d9',
                 className: 'math'
             }
         ];
 
-        // Pre-populated exams as tasks
         const defaultExams = [
-            { courseId: 'philo11', name: 'Philo — Long Test 1', dueDate: '2026-02-15', className: 'philo' },
-            { courseId: 'philo11', name: 'Philo — Long Test 2', dueDate: '2026-03-21', className: 'philo' },
-            { courseId: 'philo11', name: 'Philo — Final Oral Exam', dueDate: '2026-05-13', className: 'philo' },
-            { courseId: 'faa102', name: 'FAA — Midterm Exam', dueDate: '2026-03-11', className: 'faa' },
-            { courseId: 'faa102', name: 'FAA — Final Exam', dueDate: '2026-05-12', className: 'faa' },
-            { courseId: 'math61', name: 'Math — Long Test 1', dueDate: '2026-06-20', className: 'math' },
-            { courseId: 'math61', name: 'Math — Long Test 2', dueDate: '2026-07-03', className: 'math' },
-            { courseId: 'math61', name: 'Math — Long Test 3', dueDate: '2026-07-15', className: 'math' }
+            { name: 'Philo Midterm', courseId: 'philo11', dueDate: '2026-06-15' },
+            { name: 'FAA Final Project', courseId: 'faa102', dueDate: '2026-06-20' },
+            { name: 'Math Exam', courseId: 'math201', dueDate: '2026-06-25' }
         ];
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initializePage();
-        });
+        function injectDynamicStyles() {
+            let styleContent = '';
+            if (currentUser && currentUser.classes) {
+                currentUser.classes.forEach(cls => {
+                    const lightColor = adjustColor(cls.color, 0.2);
+                    const darkColor = cls.color;
+                    styleContent += `
+                        .event-item.${cls.className} {
+                            background: ${lightColor};
+                            border-left-color: ${darkColor};
+                        }
+                        .week-event.${cls.className} {
+                            background: ${lightColor};
+                            border-left-color: ${darkColor};
+                        }
+                    `;
+                });
+            }
+            document.getElementById('dynamicStyles').innerHTML = `<style>${styleContent}</style>`;
+        }
 
-        function initializePage() {
-            const userEmail = localStorage.getItem('currentUser');
-            
-            if (!userEmail) {
+        function adjustColor(color, amount) {
+            const hex = color.replace('#', '');
+            const num = parseInt(hex, 16);
+            const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * amount));
+            const g = Math.min(255, Math.floor(((num >> 8) & 255) + (255 - ((num >> 8) & 255)) * amount));
+            const b = Math.min(255, Math.floor((num & 255) + (255 - (num & 255)) * amount));
+            return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'signin.html';
+        }
+
+        window.addEventListener('load', loadCalendar);
+
+        function loadCalendar() {
+            const email = localStorage.getItem('currentUser');
+            if (!email) {
                 window.location.href = 'signin.html';
                 return;
             }
 
             const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            currentUser = allUsers.find(u => u.email === userEmail);
+            currentUser = allUsers.find(u => u.email === email);
 
             if (!currentUser) {
                 window.location.href = 'signin.html';
                 return;
             }
 
-            // Initialize classes with default courses if not already done
-            if (!currentUser.classes || currentUser.classes.length === 0) {
-                currentUser.classes = defaultCourses.map(c => ({ ...c }));
+            if (!currentUser.classes) {
+                currentUser.classes = defaultCourses.map(course => ({
+                    ...course,
+                    id: course.id
+                }));
             }
 
-            if (!currentUser.tasks) currentUser.tasks = [];
-            if (!currentUser.classSessions) currentUser.classSessions = [];
+            if (!currentUser.classSessions) {
+                currentUser.classSessions = [];
+            }
 
-            // Add default exams if they don't exist
+            if (!currentUser.tasks) {
+                currentUser.tasks = [];
+            }
+
             defaultExams.forEach(exam => {
                 if (!currentUser.tasks.find(t => t.name === exam.name && t.dueDate === exam.dueDate)) {
                     currentUser.tasks.push({
@@ -1071,6 +1109,7 @@
                 visibleClasses.add(cls.id);
             });
 
+            injectDynamicStyles();
             renderCalendar();
             renderFilters();
             populateEventClassSelect();
@@ -1205,7 +1244,7 @@
             const weekStart = new Date(curr.setDate(first));
             
             let html = '<div class="time-label"></div>';
-            
+
             for (let i = 0; i < 7; i++) {
                 const date = new Date(weekStart);
                 date.setDate(date.getDate() + i);
@@ -1354,9 +1393,10 @@
             document.getElementById('eventType').value = '';
             document.getElementById('eventTitle').value = '';
             document.getElementById('eventDescription').value = '';
-            document.getElementById('eventError').textContent = '';
-            document.getElementById('eventError').classList.remove('show');
+            document.getElementById('eventClass').value = '';
+            document.getElementById('modalTitle').textContent = 'Add Event';
             document.getElementById('eventModal').classList.add('active');
+            updateEventForm();
         }
 
         function closeEventModal() {
@@ -1365,20 +1405,14 @@
 
         function updateEventForm() {
             const eventType = document.getElementById('eventType').value;
-            const classScheduleSection = document.getElementById('classScheduleSection');
-            const eventDateSection = document.getElementById('eventDateSection');
-
-            if (eventType === 'class') {
-                classScheduleSection.style.display = 'block';
-                eventDateSection.style.display = 'none';
-            } else {
-                classScheduleSection.style.display = 'none';
-                eventDateSection.style.display = 'block';
-            }
+            document.getElementById('classScheduleSection').style.display = 
+                eventType === 'class' ? 'block' : 'none';
+            document.getElementById('eventDateSection').style.display = 
+                eventType !== 'class' && eventType !== '' ? 'block' : 'none';
         }
 
-        function handleSaveEvent(event) {
-            event.preventDefault();
+        function handleSaveEvent(e) {
+            e.preventDefault();
             
             const eventType = document.getElementById('eventType').value;
             const title = document.getElementById('eventTitle').value;
@@ -1416,33 +1450,47 @@
                 const endDate = document.getElementById('classEndDate').value;
 
                 if (!startTime || !endTime || !startDate || !endDate) {
-                    errorDiv.textContent = 'Please fill in all class schedule fields';
+                    errorDiv.textContent = 'Please fill in all class details';
                     errorDiv.classList.add('show');
                     return;
                 }
 
-                const session = {
+                const classSession = {
                     id: `session_${Date.now()}`,
+                    classId: classId || `class_${Date.now()}`,
                     className: title,
-                    classId: classId || null,
-                    daysOfWeek: daysOfWeek.sort(),
+                    daysOfWeek: daysOfWeek,
                     startTime: startTime,
                     endTime: endTime,
                     startDate: startDate,
                     endDate: endDate,
-                    description: description,
-                    createdAt: new Date().getTime()
+                    description: description
                 };
 
                 if (!currentUser.classSessions) currentUser.classSessions = [];
-                currentUser.classSessions.push(session);
+                currentUser.classSessions.push(classSession);
 
+                if (!classId) {
+                    const newClass = {
+                        id: classSession.classId,
+                        name: title,
+                        code: title,
+                        color: '#' + Math.floor(Math.random()*16777215).toString(16),
+                        className: title.toLowerCase().replace(/\s+/g, '')
+                    };
+                    if (!currentUser.classes) currentUser.classes = [];
+                    currentUser.classes.push(newClass);
+                    visibleClasses.add(newClass.id);
+                    injectDynamicStyles();
+                    renderFilters();
+                    populateEventClassSelect();
+                }
             } else {
-                const dueDate = document.getElementById('eventDate').value;
-                const time = document.getElementById('eventTime').value;
+                const eventDate = document.getElementById('eventDate').value;
+                const eventTime = document.getElementById('eventTime').value;
 
-                if (!dueDate) {
-                    errorDiv.textContent = 'Please select a date';
+                if (!eventDate) {
+                    errorDiv.textContent = 'Please select an event date';
                     errorDiv.classList.add('show');
                     return;
                 }
@@ -1450,9 +1498,9 @@
                 const task = {
                     id: `task_${Date.now()}`,
                     name: title,
-                    classId: classId || null,
-                    dueDate: dueDate,
-                    time: time || null,
+                    classId: classId,
+                    dueDate: eventDate,
+                    time: eventTime,
                     description: description,
                     completed: false,
                     createdAt: new Date().getTime()
@@ -1499,11 +1547,6 @@
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
             renderCalendar();
-        }
-
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'landingpage.html';
         }
     </script>
 </body>

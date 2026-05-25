@@ -991,6 +991,37 @@
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayShortNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+        // Pre-populated courses (fallback if JSON doesn't load)
+        const defaultCourses = [
+            {
+                id: 'philo11',
+                name: 'Philo 11.05',
+                code: 'Philo 11.05',
+                color: '#e8956f',
+                className: 'philo'
+            },
+            {
+                id: 'faa102',
+                name: 'FAA 102',
+                code: 'FAA 102',
+                color: '#6ba6c2',
+                className: 'faa'
+            },
+            {
+                id: 'math201',
+                name: 'Math 201',
+                code: 'Math 201',
+                color: '#b366d9',
+                className: 'math'
+            }
+        ];
+
+        const defaultExams = [
+            { name: 'Philo Midterm', courseId: 'philo11', dueDate: '2026-03-15' },
+            { name: 'FAA Final Project', courseId: 'faa102', dueDate: '2026-05-20' },
+            { name: 'Math Exam', courseId: 'math201', dueDate: '2026-05-25' }
+        ];
+
         function injectDynamicStyles() {
             let styleContent = '';
             if (currentUser && currentUser.classes) {
@@ -1036,11 +1067,42 @@
                     initializeCalendar();
                     return true;
                 } else {
-                    console.warn('No users found in users.json');
+                    console.warn('No users found in users.json, using defaults');
+                    currentUser = {
+                        id: 'default',
+                        nickname: 'User',
+                        classes: defaultCourses,
+                        classSessions: [],
+                        tasks: defaultExams.map(exam => ({
+                            id: exam.courseId + '_exam',
+                            name: exam.name,
+                            classId: exam.courseId,
+                            dueDate: exam.dueDate,
+                            description: '',
+                            completed: false
+                        }))
+                    };
+                    initializeCalendar();
                     return false;
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
+                // Fallback to default data
+                currentUser = {
+                    id: 'default',
+                    nickname: 'User',
+                    classes: defaultCourses,
+                    classSessions: [],
+                    tasks: defaultExams.map(exam => ({
+                        id: exam.courseId + '_exam',
+                        name: exam.name,
+                        classId: exam.courseId,
+                        dueDate: exam.dueDate,
+                        description: '',
+                        completed: false
+                    }))
+                };
+                initializeCalendar();
                 return false;
             }
         }
@@ -1093,7 +1155,7 @@
                 colorDot.style.backgroundColor = cls.color;
                 
                 label.appendChild(colorDot);
-                label.appendChild(document.createTextNode(cls.code));
+                label.appendChild(document.createTextNode(cls.name));
                 
                 filterItem.appendChild(checkbox);
                 filterItem.appendChild(label);
@@ -1103,8 +1165,6 @@
 
         function populateEventClassSelect() {
             const eventClass = document.getElementById('eventClass');
-            const existingOptions = eventClass.querySelectorAll('option:not(:first-child)');
-            existingOptions.forEach(opt => opt.remove());
             
             if (!currentUser || !currentUser.classes) return;
             
@@ -1248,13 +1308,13 @@
             // Add class sessions
             if (currentUser.classSessions) {
                 currentUser.classSessions.forEach(session => {
-                    if (isDateInSession(dateStr, session) && visibleClasses.has(session.classId)) {
+                    if (isDateInSession(dateStr, session)) {
                         const event = document.createElement('div');
                         event.className = 'event-item ' + session.className;
                         
                         const title = document.createElement('div');
                         title.className = 'event-title';
-                        title.textContent = getClassCodeById(session.classId);
+                        title.textContent = getClassNameById(session.classId);
                         
                         const time = document.createElement('div');
                         time.className = 'event-time';
@@ -1270,7 +1330,7 @@
             // Add tasks
             if (currentUser.tasks) {
                 currentUser.tasks.forEach(task => {
-                    if (task.dueDate === dateStr && visibleClasses.has(task.classId)) {
+                    if (task.dueDate === dateStr) {
                         const event = document.createElement('div');
                         event.className = 'event-item';
                         
@@ -1302,6 +1362,8 @@
         }
 
         function isDateInSession(dateStr, session) {
+            if (!visibleClasses.has(session.classId)) return false;
+            
             const date = new Date(dateStr);
             const dayOfWeek = date.getDay();
             const startDate = new Date(session.startDate);
@@ -1310,10 +1372,10 @@
             return date >= startDate && date <= endDate && session.daysOfWeek.includes(dayOfWeek);
         }
 
-        function getClassCodeById(classId) {
+        function getClassNameById(classId) {
             if (!currentUser || !currentUser.classes) return '';
             const cls = currentUser.classes.find(c => c.id === classId);
-            return cls ? cls.code : '';
+            return cls ? cls.name : '';
         }
 
         function renderWeekView() {

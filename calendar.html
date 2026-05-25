@@ -6,40 +6,29 @@
   <style>
     body { font-family: Arial, sans-serif; }
     .calendar-header {
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      margin-bottom: 10px;
+      display: flex; justify-content: center; align-items: center; margin-bottom: 10px;
     }
     #week-label { margin: 0 20px; font-size: 1.2em; }
     .calendar-grid {
-      display: flex; 
+      display: flex;
       border: 1px solid #aaa;
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
     }
     .calendar-day {
       flex: 1;
-      min-width: 110px;
-      min-height: 150px;
+      min-width: 100px;
+      min-height: 100px;
       border-right: 1px solid #ddd;
       padding: 8px;
       background: #f7f7f7;
+      box-sizing: border-box;
     }
     .calendar-day:last-child { border-right: none; }
-    .calendar-day .day-label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #222;
-    }
-    .task {
-      background: #fff9c4;
-      border: 1px solid #fbc02d;
-      border-radius: 4px;
-      padding: 4px 6px;
-      margin-bottom: 4px;
-      font-size: 0.95em;
-    }
+    .day-label { font-weight: bold; margin-bottom: 4px;}
+    .task { background: #eaf7ff; margin: 3px 0; padding: 3px 6px; border-radius: 3px; }
+    form { margin: 16px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;}
+    form input, form button { padding: 5px;}
   </style>
 </head>
 <body>
@@ -49,20 +38,18 @@
     <span id="week-label"></span>
     <button id="next-week">&gt;</button>
   </div>
+  <form id="add-task-form">
+    <label>Task: <input type="text" id="task-title" required></label>
+    <label>Date: <input type="date" id="task-date" required></label>
+    <button type="submit">Add Task</button>
+  </form>
   <div id="calendar-body"></div>
 
   <script>
-    // Demo: example static data. In production, load from your source/DB.
-    let tasks = [
-      { title: "Design Review",  date: "2026-05-25", time: "10:00" },
-      { title: "Write Docs",     date: "2026-05-27", time: "15:00" },
-      { title: "Frontend Fixes", date: "2026-05-31", time: "14:00" },
-      { title: "Team Sync",      date: "2026-05-30", time: "09:30" },
-      { title: "Deploy",         date: "2026-05-28", time: "12:00" },
-      // Add/edit/remove tasks as needed
-    ];
+    // Store tasks as entered by the user
+    let tasks = [];
 
-    // Helper: start of (Monday) week
+    // Helper: Monday as first day of week
     function getStartOfWeek(date) {
       const d = new Date(date);
       const day = d.getDay();
@@ -71,7 +58,7 @@
       monday.setHours(0,0,0,0);
       return monday;
     }
-    // Helper: get 7 days of week from start (Monday)
+
     function getWeekDates(startDate) {
       return Array.from({ length: 7 }, (_, i) => {
         const date = new Date(startDate);
@@ -82,53 +69,36 @@
 
     let currentWeekStartDate = getStartOfWeek(new Date());
 
-    function format(date, opts = {}) {
-      // opts = { short: true/false }
-      return date.toLocaleDateString(undefined, {
-        month: opts.short ? "short" : "long",
-        day: "numeric",
-        year: opts.year ? "numeric" : undefined
-      });
-    }
-
     function formatWeekLabel(weekDates) {
+      const options = { month: "short", day: "numeric" };
       const first = weekDates[0];
       const last = weekDates[6];
-      const sameMonth = first.getMonth() === last.getMonth();
-      let label;
-      if (sameMonth) {
-        label = `${format(first, { short:true })} – ${last.getDate()}, ${last.getFullYear()}`;
+      if (first.getMonth() === last.getMonth()) {
+        return `${first.toLocaleDateString(undefined, options)} – ${last.getDate()}, ${last.getFullYear()}`;
       } else {
-        label = `${format(first, { short:true })} – ${format(last, { short:true, year:true })}`;
+        return `${first.toLocaleDateString(undefined, options)} – ${last.toLocaleDateString(undefined, options)}, ${last.getFullYear()}`;
       }
-      return label;
     }
 
     function renderCalendar() {
       const weekDates = getWeekDates(currentWeekStartDate);
 
-      // Set header label
       document.getElementById("week-label").textContent = formatWeekLabel(weekDates);
 
-      // Build 7 days
       let html = `<div class="calendar-grid">`;
-      weekDates.forEach((date, idx) => {
+
+      weekDates.forEach((date) => {
         const dayName = date.toLocaleDateString(undefined, { weekday: "short" });
         const isoDay = date.toISOString().slice(0, 10);
 
-        // Find tasks for this day
-        const todaysTasks = tasks
-          .filter(t => t.date === isoDay)
-          .sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+        // ONLY user-added tasks
+        const todaysTasks = tasks.filter(t => t.date === isoDay);
 
         html += `<div class="calendar-day">
           <div class="day-label">${dayName}<br><span style="font-size:0.9em; color:#555;">${date.getDate()}</span></div>`;
         todaysTasks.forEach(t => {
-          html += `<div class="task">${t.time ? `<b>${t.time}</b>: ` : ""}${t.title}</div>`;
+          html += `<div class="task">${t.title}</div>`;
         });
-        if(todaysTasks.length === 0) {
-          html += `<div style="color:#aaa;font-size:0.9em;">No tasks</div>`;
-        }
         html += `</div>`;
       });
       html += `</div>`;
@@ -146,14 +116,25 @@
       renderCalendar();
     };
 
-    // To reflect changes: call this to update tasks and refresh view
-    function updateTasks(newTasks) {
-      tasks = newTasks;
-      renderCalendar();
-    }
-    // Example usage:
-    // updateTasks([...tasks, {title:'New Task',date:'2026-06-04',time:'10:00'}]);
+    // Task form listener
+    document.getElementById("add-task-form").onsubmit = function (evt) {
+      evt.preventDefault();
+      const title = document.getElementById("task-title").value.trim();
+      const date = document.getElementById("task-date").value;
+      if (title && date) {
+        tasks.push({ title, date });
+        this.reset();
+        // If the added task's date is not in the current week, go to that week:
+        const d = new Date(date);
+        const weekStart = getStartOfWeek(d);
+        if (weekStart.getTime() !== currentWeekStartDate.getTime()) {
+          currentWeekStartDate = weekStart;
+        }
+        renderCalendar();
+      }
+    };
 
+    // Initial render
     renderCalendar();
   </script>
 </body>

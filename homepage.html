@@ -664,10 +664,7 @@
                 <button class="close-modal" onclick="closeChatModal()">&times;</button>
             </div>
             <div class="modal-body chat-modal-body">
-                <iframe id="chatbotIframe"
-                        frameborder="0"
-                        style="width: 100%; height: 100%;"
-                        allow="geolocation; microphone; camera"></iframe>
+                <div id="webchat" style="width: 100%; height: 100%;"></div>
             </div>
         </div>
     </div>
@@ -796,6 +793,8 @@
 
     <!-- Load Copilot Bridge for chatbot integration -->
     <script src="chatbot/copilot-bridge.js"></script>
+
+    <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 
     <script>
         let currentUser = null;
@@ -1009,13 +1008,22 @@
         }
 
         function openChatModal() {
-            const iframe = document.getElementById('chatbotIframe');
-            if (!iframe.src || iframe.src === 'about:blank') {
-                iframe.src = 'https://copilotstudio.microsoft.com/environments/Default-56090e62-2540-4107-916f-cd9690f423d3/bots/cr293_erikaSemesterPlanner/webchat?__version__=2';
-            }
             document.getElementById('chatModal').classList.add('active');
+            
+            // Load webchat only once
+            if (!window.chatLoaded) {
+                window.WebChat.renderWebChat(
+                    {
+                        directLine: window.WebChat.createDirectLine({ 
+                            token: 'DrryC0TY7PzaP7eQCvYtMmoh0mw3wbdOeOWwQapyF7zGu1VK3SwmJQQJ99CEAC4f1cMAArohAAABAZBS4W8m.8MNpyWEiLOXnAZzAAlvsqxedIjSy1Xt7Mx5juBPWhta9m3edpbDWJQQJ99CEAC4f1cMAArohAAABAZBS1m21'
+                        })
+                    },
+                    document.getElementById('webchat')
+                );
+                window.chatLoaded = true;
+            }
         }
-
+        
         function closeChatModal() {
             document.getElementById('chatModal').classList.remove('active');
         }

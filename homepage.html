@@ -207,6 +207,21 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
+        .task-item.philo {
+            background: linear-gradient(135deg, #fce4d6 0%, #e5eaeb 100%);
+            border-left-color: #e8956f;
+        }
+
+        .task-item.faa {
+            background: linear-gradient(135deg, #d4e9f0 0%, #e5eaeb 100%);
+            border-left-color: #6ba6c2;
+        }
+
+        .task-item.math {
+            background: linear-gradient(135deg, #e8d5f0 0%, #e5eaeb 100%);
+            border-left-color: #b366d9;
+        }
+
         .task-checkbox {
             width: 20px;
             height: 20px;
@@ -348,208 +363,59 @@
             background: #a8bfc8;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease-in;
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
+        .class-item {
             background: #ffffff;
             border-radius: 10px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease-in;
-        }
-
-        .modal-content.chat-modal {
-            max-width: 900px;
-            height: 85vh;        /* add this */
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            background: #824531;
-            color: #ffffff;
             padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 10px 10px 0 0;
-            flex-shrink: 0;
-        }
-
-        .modal-header h2 {
-            font-size: 1.5rem;
-            margin: 0;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 0;
-            line-height: 1;
-        }
-
-        .modal-body {
-            padding: 2rem;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .modal-body.chat-modal-body {
-            padding: 0;
-            overflow: hidden;
-            height: 600px;  /* add this */
-            min-height: 500px;
-        }    
-
-        .chat-modal-body iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #191817;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ededed;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #824531;
-            box-shadow: 0 0 5px rgba(130, 69, 49, 0.2);
-        }
-
-        .form-buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-        }
-
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #824531;
             transition: all 0.3s;
         }
 
-        .btn-primary {
-            background: #824531;
-            color: #ffffff;
+        .class-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-primary:hover {
-            background: #692c18;
+        .class-item.philo {
+            border-left-color: #e8956f;
         }
 
-        .btn-secondary {
-            background: #ededed;
+        .class-item.faa {
+            border-left-color: #6ba6c2;
+        }
+
+        .class-item.math {
+            border-left-color: #b366d9;
+        }
+
+        .class-name {
+            font-weight: 600;
             color: #191817;
-        }
-
-        .btn-secondary:hover {
-            background: #e5eaeb;
-        }
-
-        .error-message {
-            background: #f44336;
-            color: #ffffff;
-            padding: 0.8rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .schedule-days-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.7rem;
-            margin-bottom: 1rem;
-        }
-        
-        .schedule-day-item {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
+            margin-bottom: 0.5rem;
             font-size: 0.95rem;
-            cursor: pointer;
-            color: #4a2a1f;
-        }
-        
-        .schedule-day-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
         }
 
-        .error-message.show {
-            display: block;
+        .class-info {
+            color: #8c8c8c;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
         }
 
         @media (max-width: 1200px) {
             .main-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(3, 1fr);
             }
 
             .content-area {
@@ -562,11 +428,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .task-list {
-                grid-template-columns: 1fr;
-            }
-
-            .content-area {
+            .classes-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -586,573 +448,207 @@
 
     <div class="main-grid">
         <div>
+            <!-- Hero Section -->
             <div class="hero-section">
                 <div class="hero-content">
-                    <h1>Welcome, <span id="userGreeting">User</span>!</h1>
-                    <p>Stay on top of your coursework with intelligent scheduling and task management.</p>
-                    <div class="hero-stats">
-                        <div class="stat-box">
-                            <div class="stat-number" id="classCount">0</div>
-                            <div class="stat-label">Classes</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-number" id="taskCount">0</div>
-                            <div class="stat-label">Pending Tasks</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-number" id="completedCount">0</div>
-                            <div class="stat-label">Completed</div>
-                        </div>
+                    <h1>Welcome, <span id="userNickname">User</span>!</h1>
+                    <p>You're all set for success. Here's your academic overview.</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="classCount">3</div>
+                        <div class="stat-label">Classes</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="examCount">8</div>
+                        <div class="stat-label">Exams</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="completedCount">0</div>
+                        <div class="stat-label">Completed</div>
                     </div>
                 </div>
             </div>
 
+            <!-- Classes Section -->
+            <div style="margin-bottom: 2rem;">
+                <h2 style="color: #824531; margin-bottom: 1.5rem; font-size: 1.5rem;">Your Classes</h2>
+                <div class="classes-grid" id="classesGrid"></div>
+            </div>
+
+            <!-- Upcoming Tasks Section -->
             <div class="pending-tasks">
-                <h2>Pending Tasks</h2>
+                <h2>📅 Upcoming Exams & Tasks</h2>
                 <div class="task-list" id="taskList">
                     <div class="empty-state">
-                        <p>No pending tasks. Great job staying on top of everything!</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content-area">
-                <div class="card">
-                    <h2><span class="card-icon">S</span>Summary</h2>
-                    <div id="summary">
-                        <div class="empty-state">
-                            <p>Add classes and tasks to see your summary here.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2><span class="card-icon">C</span>My Classes</h2>
-                    <div id="classesOverview">
-                        <div class="empty-state">
-                            <p>No classes added yet.</p>
-                        </div>
+                        <p>No upcoming tasks</p>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-card">
-                <h3>Quick Actions</h3>
-                <button class="quick-action-btn" onclick="openChatModal()">Chat with Erika</button>
-                <button class="quick-action-btn secondary" onclick="openAddClassModal()">Add Class</button>
-                <button class="quick-action-btn secondary" onclick="openAddTaskModal()">Add Task</button>
-                <a href="calendar.html" style="text-decoration: none;">
-                    <button class="quick-action-btn secondary" style="width: 100%; margin-bottom: 0;">View Calendar</button>
-                </a>
+                <h3>⚡ Quick Actions</h3>
+                <button class="quick-action-btn" onclick="navigateTo('calendar.html')">📅 View Calendar</button>
+                <button class="quick-action-btn secondary" onclick="scrollToTasks()">📝 View Tasks</button>
             </div>
 
             <div class="sidebar-card">
-                <h3>Upcoming Deadlines</h3>
-                <div id="upcomingDeadlines">
-                    <p style="color: #8c8c8c; font-size: 0.9rem;">No upcoming deadlines</p>
+                <h3>📊 Academic Summary</h3>
+                <div id="academicSummary">
+                    <div class="summary-item">
+                        <div class="summary-icon">📚</div>
+                        <div class="summary-text">
+                            <h4>Total Classes</h4>
+                            <p id="summaryClasses">3 courses</p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">✏️</div>
+                        <div class="summary-text">
+                            <h4>Pending Tests</h4>
+                            <p id="summaryExams">8 exams</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="chatModal" class="modal">
-        <div class="modal-content chat-modal">
-            <div class="modal-header">
-                <h2>Chat with Erika</h2>
-                <button class="close-modal" onclick="closeChatModal()">&times;</button>
-            </div>
-            <div class="modal-body chat-modal-body">
-                <div id="webchat" style="width: 100%; height: 100%;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="addClassModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="classModalTitle">Add New Class</h2>
-                <button class="close-modal" onclick="closeAddClassModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="error-message" id="classError"></div>
-                <form onsubmit="handleSaveClass(event)">
-                    <div class="form-group">
-                        <label for="className">Class Name</label>
-                        <input type="text" id="className" placeholder="e.g., Introduction to Computer Science" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="classCode">Class Code</label>
-                        <input type="text" id="classCode" placeholder="e.g., CS101" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="classColor">Color</label>
-                        <input type="color" id="classColor" value="#824531" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Schedule</label>
-                    
-                        <div class="schedule-days-list">
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Monday">
-                                <span>Monday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Tuesday">
-                                <span>Tuesday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Wednesday">
-                                <span>Wednesday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Thursday">
-                                <span>Thursday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Friday">
-                                <span>Friday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Saturday">
-                                <span>Saturday</span>
-                            </label>
-                        
-                            <label class="schedule-day-item">
-                                <input type="checkbox" class="schedule-day" value="Sunday">
-                                <span>Sunday</span>
-                            </label>
-                        </div>
-                    
-                        <div style="display: flex; gap: 1rem;">
-                            <div style="flex: 1;">
-                                <label for="classStartTime">Start Time</label>
-                                <input type="time" id="classStartTime">
-                            </div>
-                    
-                            <div style="flex: 1;">
-                                <label for="classEndTime">End Time</label>
-                                <input type="time" id="classEndTime">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="classInstructor">Instructor</label>
-                        <input type="text" id="classInstructor" placeholder="Professor Name">
-                    </div>
-                    <div class="form-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="closeAddClassModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Class</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="addTaskModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Task</h2>
-                <button class="close-modal" onclick="closeAddTaskModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="error-message" id="taskError"></div>
-                <form onsubmit="handleSaveTask(event)">
-                    <div class="form-group">
-                        <label for="taskName">Task Name</label>
-                        <input type="text" id="taskName" placeholder="e.g., Complete Assignment 3" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskClass">Class</label>
-                        <select id="taskClass" required>
-                            <option value="">Select a class...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDueDate">Due Date</label>
-                        <input type="date" id="taskDueDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDescription">Description</label>
-                        <textarea id="taskDescription" placeholder="Add details about this task..." rows="3"></textarea>
-                    </div>
-                    <div class="form-buttons">
-                        <button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Task</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- WordPress Bot Integration -->
     <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
     <script src="https://files.bpcontent.cloud/2026/05/25/14/20260525144219-HM3RDDTF.js" defer></script>
 
     <script>
         let currentUser = null;
-        let editingClassId = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initializePage();
-        });
-
-        function initializePage() {
-            const userEmail = localStorage.getItem('currentUser');
-            
-            if (!userEmail) {
-                window.location.href = 'signin.html';
-                return;
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                const users = await response.json();
+                
+                if (users && users.length > 0) {
+                    currentUser = users[0];
+                    displayUserData();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
             }
+        }
 
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            currentUser = allUsers.find(u => u.email === userEmail);
+        function displayUserData() {
+            if (!currentUser) return;
 
-            if (!currentUser) {
-                window.location.href = 'signin.html';
-                return;
-            }
+            // Display username
+            document.getElementById('userNickname').textContent = currentUser.nickname;
 
-            if (!currentUser.classes) currentUser.classes = [];
-            if (!currentUser.tasks) currentUser.tasks = [];
-
-            document.getElementById('userGreeting').textContent = currentUser.nickname;
-
-            displayStats();
-            displayPendingTasks();
-            displaySummary();
+            // Display classes
             displayClasses();
-            displayUpcomingDeadlines();
-            populateClassSelect();
-        }
 
-        function saveUserData() {
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                allUsers[userIndex] = currentUser;
-                localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            }
-        }
+            // Display tasks
+            displayTasks();
 
-        function displayStats() {
-            const completedTasks = (currentUser.tasks || []).filter(t => t.completed).length;
-            const pendingTasks = (currentUser.tasks || []).filter(t => !t.completed).length;
-
-            document.getElementById('classCount').textContent = (currentUser.classes || []).length;
-            document.getElementById('taskCount').textContent = pendingTasks;
-            document.getElementById('completedCount').textContent = completedTasks;
-        }
-
-        function displayPendingTasks() {
-            const tasks = (currentUser.tasks || []).filter(t => !t.completed);
-            const taskList = document.getElementById('taskList');
-
-            if (tasks.length === 0) {
-                taskList.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No pending tasks. Great job staying on top of everything!</p></div>';
-                return;
-            }
-
-            taskList.innerHTML = tasks.map(task => {
-                const classInfo = (currentUser.classes || []).find(c => c.id === task.classId);
-                return `
-                    <div class="task-item" id="task-${task.id}">
-                        <input type="checkbox" class="task-checkbox" onchange="toggleTaskComplete('${task.id}')">
-                        <div class="task-content">
-                            <h4>${task.name}</h4>
-                            <div class="course">${classInfo ? classInfo.name : 'General'}</div>
-                            <div class="due-date">Due: ${new Date(task.dueDate).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleTaskComplete(taskId) {
-            const task = (currentUser.tasks || []).find(t => t.id === taskId);
-            if (task) {
-                task.completed = !task.completed;
-                saveUserData();
-                displayStats();
-                displayPendingTasks();
-            }
-        }
-        
-        function displaySummary() {
-            const tasks = currentUser.tasks || [];
-            const classes = currentUser.classes || [];
-            const totalTasks = tasks.length;
-            const completedTasks = tasks.filter(t => t.completed).length;
-            const pendingTasks = tasks.filter(t => !t.completed).length;
-
-            const summaryHtml = `
-                <div class="summary-item">
-                    <div class="summary-icon">B</div>
-                    <div class="summary-text">
-                        <h4>Total Classes</h4>
-                        <p>${classes.length} class${classes.length !== 1 ? 'es' : ''}</p>
-                    </div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-icon">V</div>
-                    <div class="summary-text">
-                        <h4>Completed Tasks</h4>
-                        <p>${completedTasks} of ${totalTasks}</p>
-                    </div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-icon">T</div>
-                    <div class="summary-text">
-                        <h4>Pending Tasks</h4>
-                        <p>${pendingTasks} task${pendingTasks !== 1 ? 's' : ''} to complete</p>
-                    </div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-icon">P</div>
-                    <div class="summary-text">
-                        <h4>Progress</h4>
-                        <p>${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}% complete</p>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('summary').innerHTML = summaryHtml;
+            // Update stats
+            updateStats();
         }
 
         function displayClasses() {
-            const classes = currentUser.classes || [];
-            
-            if (classes.length === 0) {
-                document.getElementById('classesOverview').innerHTML = '<div class="empty-state"><p>No classes added yet.</p></div>';
+            const classesGrid = document.getElementById('classesGrid');
+            classesGrid.innerHTML = '';
+
+            if (!currentUser.classes) return;
+
+            currentUser.classes.forEach(cls => {
+                const classItem = document.createElement('div');
+                classItem.className = 'class-item ' + cls.className;
+                
+                const session = currentUser.classSessions.find(s => s.classId === cls.id);
+                const daysStr = session ? getDaysOfWeekString(session.daysOfWeek) : 'TBA';
+                const timeStr = session ? `${session.startTime}-${session.endTime}` : 'TBA';
+
+                classItem.innerHTML = `
+                    <div class="class-name">${cls.name}</div>
+                    <div class="class-info"><strong>Instructor:</strong> ${cls.instructor}</div>
+                    <div class="class-info"><strong>Location:</strong> ${cls.room}</div>
+                    <div class="class-info"><strong>Schedule:</strong> ${daysStr}</div>
+                    <div class="class-info"><strong>Time:</strong> ${timeStr}</div>
+                `;
+                
+                classesGrid.appendChild(classItem);
+            });
+        }
+
+        function displayTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            if (!currentUser.tasks || currentUser.tasks.length === 0) {
+                taskList.innerHTML = '<div class="empty-state"><p>No upcoming tasks</p></div>';
                 return;
             }
 
-            const classesHtml = classes.map(cls => {
-                return `
-                    <div class="summary-item" style="justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
-                            <div class="summary-icon" style="color: ${cls.color || '#824531'};">C</div>
-                            <div class="summary-text">
-                                <h4>${cls.name}</h4>
-                                <p>${cls.code || 'No code'}</p>
-                                
-                                <p style="font-size: 0.8rem; color: #692c18; margin-top: 0.3rem;">
-                                    ${
-                                        cls.schedule && cls.schedule.days?.length
-                                        ? `${cls.schedule.days.join(', ')} | ${cls.schedule.startTime} - ${cls.schedule.endTime}`
-                                        : 'No schedule set'
-                                    }
-                                </p>
-                            </div>
-                        </div>
-                        <button type="button" onclick="editClass('${cls.id}')" style="background: none; border: none; color: #824531; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Edit</button>
+            // Sort tasks by due date
+            const sortedTasks = [...currentUser.tasks].sort((a, b) => 
+                new Date(a.dueDate) - new Date(b.dueDate)
+            );
+
+            sortedTasks.forEach(task => {
+                const classObj = currentUser.classes.find(c => c.id === task.classId);
+                const className = classObj ? classObj.className : '';
+                
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item ' + className;
+                
+                const dueDateObj = new Date(task.dueDate);
+                const dueDateStr = dueDateObj.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                taskItem.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                    <div class="task-content">
+                        <h4>${task.name}</h4>
+                        <div class="course">${classObj ? classObj.code : 'Personal'}</div>
+                        <div class="due-date">Due: ${dueDateStr}${task.time ? ' at ' + task.time : ''}</div>
                     </div>
                 `;
-            }).join('');
-
-            document.getElementById('classesOverview').innerHTML = classesHtml;
-        }
-
-        function displayUpcomingDeadlines() {
-            const allDeadlines = [];
-            (currentUser.tasks || []).forEach(task => {
-                if (!task.completed) {
-                    const classInfo = (currentUser.classes || []).find(c => c.id === task.classId);
-                    allDeadlines.push({
-                        title: task.name,
-                        date: task.dueDate,
-                        className: classInfo ? classInfo.name : 'General',
-                        classColor: classInfo ? classInfo.color : '#824531'
-                    });
-                }
+                
+                taskList.appendChild(taskItem);
             });
-
-            allDeadlines.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const upcoming = allDeadlines.slice(0, 5);
-
-            const deadlineHtml = upcoming.length > 0
-                ? upcoming.map(d => `
-                    <div class="summary-item">
-                        <div class="summary-icon" style="color: ${d.classColor || '#824531'};">D</div>
-                        <div class="summary-text">
-                            <h4>${d.title}</h4>
-                            <p>${d.className} - ${new Date(d.date).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                `).join('')
-                : '<p style="color: #8c8c8c; font-size: 0.9rem;">No upcoming deadlines</p>';
-
-            document.getElementById('upcomingDeadlines').innerHTML = deadlineHtml;
         }
 
-        function populateClassSelect() {
-            const select = document.getElementById('taskClass');
-            const classes = currentUser.classes || [];
+        function updateStats() {
+            document.getElementById('classCount').textContent = currentUser.classes ? currentUser.classes.length : '0';
+            document.getElementById('examCount').textContent = currentUser.tasks ? currentUser.tasks.length : '0';
             
-            const options = classes.map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
-            select.innerHTML = '<option value="">Select a class...</option>' + options;
+            const completed = currentUser.tasks ? currentUser.tasks.filter(t => t.completed).length : 0;
+            document.getElementById('completedCount').textContent = completed;
+
+            document.getElementById('summaryClasses').textContent = `${currentUser.classes ? currentUser.classes.length : '0'} courses`;
+            document.getElementById('summaryExams').textContent = `${currentUser.tasks ? currentUser.tasks.length : '0'} exams`;
         }
 
-        function openChatModal() {
-            document.getElementById('chatModal').classList.add('active');
+        function getDaysOfWeekString(daysArray) {
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return daysArray.map(day => dayNames[day]).join(', ');
         }
 
-        function closeChatModal() {
-            document.getElementById('chatModal').classList.remove('active');
+        function navigateTo(page) {
+            window.location.href = page;
         }
 
-        function openAddClassModal() {
-            editingClassId = null;
-            document.getElementById('classModalTitle').textContent = 'Add New Class';
-            document.getElementById('className').value = '';
-            document.getElementById('classCode').value = '';
-            document.getElementById('classColor').value = '#824531';
-            document.getElementById('classInstructor').value = '';
-            document.querySelectorAll('.schedule-day').forEach(cb => cb.checked = false);
-            document.getElementById('classStartTime').value = '';
-            document.getElementById('classEndTime').value = '';
-            document.getElementById('classError').textContent = '';
-            document.getElementById('classError').classList.remove('show');
-            document.getElementById('addClassModal').classList.add('active');
-        }
-
-        function closeAddClassModal() {
-            document.getElementById('addClassModal').classList.remove('active');
-        }
-
-        function editClass(classId) {
-            const cls = (currentUser.classes || []).find(c => c.id === classId);
-            if (!cls) return;
-
-            editingClassId = classId;
-            document.getElementById('classModalTitle').textContent = 'Edit Class';
-            document.getElementById('className').value = cls.name;
-            document.getElementById('classCode').value = cls.code || '';
-            document.getElementById('classColor').value = cls.color || '#824531';
-            document.getElementById('classInstructor').value = cls.instructor || '';
-            
-            document.querySelectorAll('.schedule-day').forEach(cb => {
-                cb.checked = (cls.schedule?.days || []).includes(cb.value);
-            });
-            
-            document.getElementById('classStartTime').value = cls.schedule?.startTime || '';
-            document.getElementById('classEndTime').value = cls.schedule?.endTime || '';
-            document.getElementById('classError').textContent = '';
-            document.getElementById('classError').classList.remove('show');
-            document.getElementById('addClassModal').classList.add('active');
-        }
-
-        function handleSaveClass(event) {
-            event.preventDefault();
-            const name = document.getElementById('className').value;
-            const code = document.getElementById('classCode').value;
-            const color = document.getElementById('classColor').value;
-            const instructor = document.getElementById('classInstructor').value;
-            const startTime = document.getElementById('classStartTime').value;
-            const endTime = document.getElementById('classEndTime').value;
-            const days = Array.from(document.querySelectorAll('.schedule-day:checked')).map(cb => cb.value);
-            const errorDiv = document.getElementById('classError');
-
-            errorDiv.classList.remove('show');
-
-            if (!name || !code) {
-                errorDiv.textContent = 'Class name and code are required';
-                errorDiv.classList.add('show');
-                return;
-            }
-
-            if (editingClassId) {
-                const cls = (currentUser.classes || []).find(c => c.id === editingClassId);
-                if (cls) {
-                    cls.name = name;
-                    cls.code = code;
-                    cls.color = color;
-                    cls.instructor = instructor;
-                    cls.schedule = { days, startTime, endTime };
-                }
-            } else {
-                const newClass = {
-                    id: `class_${Date.now()}`,
-                    name,
-                    code,
-                    color,
-                    instructor,
-                    schedule: { days, startTime, endTime },
-                    deadlines: [],
-                    meetings: []
-                };
-                if (!currentUser.classes) currentUser.classes = [];
-                currentUser.classes.push(newClass);
-            }
-
-            saveUserData();
-            closeAddClassModal();
-            displayStats();
-            displayClasses();
-            populateClassSelect();
-        }
-
-        function openAddTaskModal() {
-            document.getElementById('taskName').value = '';
-            document.getElementById('taskClass').value = '';
-            document.getElementById('taskDueDate').value = '';
-            document.getElementById('taskDescription').value = '';
-            document.getElementById('taskError').textContent = '';
-            document.getElementById('taskError').classList.remove('show');
-            document.getElementById('addTaskModal').classList.add('active');
-        }
-
-        function closeAddTaskModal() {
-            document.getElementById('addTaskModal').classList.remove('active');
-        }
-
-        function handleSaveTask(event) {
-            event.preventDefault();
-            const name = document.getElementById('taskName').value;
-            const classId = document.getElementById('taskClass').value;
-            const dueDate = document.getElementById('taskDueDate').value;
-            const description = document.getElementById('taskDescription').value;
-            const errorDiv = document.getElementById('taskError');
-
-            errorDiv.classList.remove('show');
-
-            if (!name || !classId || !dueDate) {
-                errorDiv.textContent = 'All fields are required';
-                errorDiv.classList.add('show');
-                return;
-            }
-
-            const newTask = {
-                id: `task_${Date.now()}`,
-                name,
-                classId,
-                dueDate,
-                description,
-                completed: false,
-                createdAt: new Date().getTime()
-            };
-
-            if (!currentUser.tasks) currentUser.tasks = [];
-            currentUser.tasks.push(newTask);
-
-            saveUserData();
-            closeAddTaskModal();
-            displayStats();
-            displayPendingTasks();
-            displaySummary();
-            displayUpcomingDeadlines();
+        function scrollToTasks() {
+            document.querySelector('.pending-tasks').scrollIntoView({ behavior: 'smooth' });
         }
 
         function logout() {
-            localStorage.removeItem('currentUser');
             window.location.href = 'landingpage.html';
         }
+
+        window.addEventListener('DOMContentLoaded', loadUserData);
     </script>
 </body>
 </html>

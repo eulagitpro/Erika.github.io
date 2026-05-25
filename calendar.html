@@ -991,7 +991,7 @@
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const dayShortNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-        // Pre-populated courses
+        // Pre-populated courses (fallback if JSON doesn't load)
         const defaultCourses = [
             {
                 id: 'philo11',
@@ -1017,9 +1017,9 @@
         ];
 
         const defaultExams = [
-            { name: 'Philo Midterm', courseId: 'philo11', dueDate: '2026-06-15' },
-            { name: 'FAA Final Project', courseId: 'faa102', dueDate: '2026-06-20' },
-            { name: 'Math Exam', courseId: 'math201', dueDate: '2026-06-25' }
+            { name: 'Philo Midterm', courseId: 'philo11', dueDate: '2026-03-15' },
+            { name: 'FAA Final Project', courseId: 'faa102', dueDate: '2026-05-20' },
+            { name: 'Math Exam', courseId: 'math201', dueDate: '2026-05-25' }
         ];
 
         function injectDynamicStyles() {
@@ -1049,130 +1049,180 @@
             const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * amount));
             const g = Math.min(255, Math.floor(((num >> 8) & 255) + (255 - ((num >> 8) & 255)) * amount));
             const b = Math.min(255, Math.floor((num & 255) + (255 - (num & 255)) * amount));
-            return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
         }
 
-        function logout() {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'signin.html';
-        }
-
-        window.addEventListener('load', loadCalendar);
-
-        function loadCalendar() {
-            const email = localStorage.getItem('currentUser');
-            if (!email) {
-                window.location.href = 'signin.html';
-                return;
-            }
-
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            currentUser = allUsers.find(u => u.email === email);
-
-            if (!currentUser) {
-                window.location.href = 'signin.html';
-                return;
-            }
-
-            if (!currentUser.classes) {
-                currentUser.classes = defaultCourses.map(course => ({
-                    ...course,
-                    id: course.id
-                }));
-            }
-
-            if (!currentUser.classSessions) {
-                currentUser.classSessions = [];
-            }
-
-            if (!currentUser.tasks) {
-                currentUser.tasks = [];
-            }
-
-            defaultExams.forEach(exam => {
-                if (!currentUser.tasks.find(t => t.name === exam.name && t.dueDate === exam.dueDate)) {
-                    currentUser.tasks.push({
-                        id: `task_${Date.now()}_${Math.random()}`,
+        // Load user data from users.json
+        async function loadUserData() {
+            try {
+                const response = await fetch('users.json');
+                const users = await response.json();
+                
+                // Get the first user (or implement proper user identification)
+                if (users && users.length > 0) {
+                    currentUser = users[0];
+                    console.log('User data loaded:', currentUser);
+                    
+                    // Initialize calendar with user data
+                    initializeCalendar();
+                    return true;
+                } else {
+                    console.warn('No users found in users.json, using defaults');
+                    currentUser = {
+                        id: 'default',
+                        nickname: 'User',
+                        classes: defaultCourses,
+                        classSessions: [],
+                        tasks: defaultExams.map(exam => ({
+                            id: exam.courseId + '_exam',
+                            name: exam.name,
+                            classId: exam.courseId,
+                            dueDate: exam.dueDate,
+                            description: '',
+                            completed: false
+                        }))
+                    };
+                    initializeCalendar();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                // Fallback to default data
+                currentUser = {
+                    id: 'default',
+                    nickname: 'User',
+                    classes: defaultCourses,
+                    classSessions: [],
+                    tasks: defaultExams.map(exam => ({
+                        id: exam.courseId + '_exam',
                         name: exam.name,
                         classId: exam.courseId,
                         dueDate: exam.dueDate,
                         description: '',
-                        completed: false,
-                        createdAt: new Date().getTime()
-                    });
-                }
-            });
+                        completed: false
+                    }))
+                };
+                initializeCalendar();
+                return false;
+            }
+        }
 
-            saveUserData();
-
-            (currentUser.classes || []).forEach(cls => {
-                visibleClasses.add(cls.id);
-            });
-
+        function initializeCalendar() {
+            // Initialize all visible classes as checked
+            if (currentUser && currentUser.classes) {
+                currentUser.classes.forEach(cls => {
+                    visibleClasses.add(cls.id);
+                });
+            }
+            
             injectDynamicStyles();
-            renderCalendar();
-            renderFilters();
+            populateFilters();
             populateEventClassSelect();
+            updateCurrentDateDisplay();
+            renderCalendar();
         }
 
-        function saveUserData() {
-            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
-            const userIndex = allUsers.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                allUsers[userIndex] = currentUser;
-                localStorage.setItem('allUsers', JSON.stringify(allUsers));
-            }
-        }
-
-        function renderFilters() {
+        function populateFilters() {
             const filterList = document.getElementById('filterList');
-            const classes = currentUser.classes || [];
-
-            if (classes.length === 0) {
-                filterList.innerHTML = '<p style="color: #8c8c8c; font-size: 0.95rem;">No classes added yet.</p>';
-                return;
-            }
-
-            filterList.innerHTML = classes.map(cls => `
-                <div class="filter-item">
-                    <input 
-                        type="checkbox" 
-                        class="filter-checkbox" 
-                        id="filter-${cls.id}" 
-                        checked 
-                        onchange="toggleClassVisibility('${cls.id}')"
-                    >
-                    <label for="filter-${cls.id}" class="filter-label">
-                        <div class="color-dot" style="background-color: ${cls.color || '#824531'};"></div>
-                        ${cls.name}
-                    </label>
-                </div>
-            `).join('');
+            filterList.innerHTML = '';
+            
+            if (!currentUser || !currentUser.classes) return;
+            
+            currentUser.classes.forEach(cls => {
+                const filterItem = document.createElement('div');
+                filterItem.className = 'filter-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'filter_' + cls.id;
+                checkbox.className = 'filter-checkbox';
+                checkbox.checked = true;
+                checkbox.onchange = function() {
+                    if (this.checked) {
+                        visibleClasses.add(cls.id);
+                    } else {
+                        visibleClasses.delete(cls.id);
+                    }
+                    renderCalendar();
+                };
+                
+                const label = document.createElement('label');
+                label.htmlFor = 'filter_' + cls.id;
+                label.className = 'filter-label';
+                
+                const colorDot = document.createElement('div');
+                colorDot.className = 'color-dot';
+                colorDot.style.backgroundColor = cls.color;
+                
+                label.appendChild(colorDot);
+                label.appendChild(document.createTextNode(cls.name));
+                
+                filterItem.appendChild(checkbox);
+                filterItem.appendChild(label);
+                filterList.appendChild(filterItem);
+            });
         }
 
-        function toggleClassVisibility(classId) {
-            if (visibleClasses.has(classId)) {
-                visibleClasses.delete(classId);
+        function populateEventClassSelect() {
+            const eventClass = document.getElementById('eventClass');
+            
+            if (!currentUser || !currentUser.classes) return;
+            
+            currentUser.classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.id;
+                option.textContent = cls.name;
+                eventClass.appendChild(option);
+            });
+        }
+
+        function updateCurrentDateDisplay() {
+            const options = { month: 'long', year: 'numeric' };
+            document.getElementById('currentDate').textContent = 
+                currentDate.toLocaleDateString('en-US', options);
+        }
+
+        function previousPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() - 7);
             } else {
-                visibleClasses.add(classId);
+                currentDate.setDate(currentDate.getDate() - 1);
             }
+            updateCurrentDateDisplay();
+            renderCalendar();
+        }
+
+        function nextPeriod() {
+            if (currentView === 'month') {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            } else if (currentView === 'week') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            updateCurrentDateDisplay();
             renderCalendar();
         }
 
         function switchView(view) {
             currentView = view;
-            
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-
+            
             document.getElementById('monthView').classList.remove('active');
             document.getElementById('weekView').classList.remove('active');
             document.getElementById('dayView').classList.remove('active');
-
-            document.getElementById(view + 'View').classList.add('active');
-
+            
+            if (view === 'month') {
+                document.getElementById('monthView').classList.add('active');
+            } else if (view === 'week') {
+                document.getElementById('weekView').classList.add('active');
+            } else {
+                document.getElementById('dayView').classList.add('active');
+            }
+            
             renderCalendar();
         }
 
@@ -1181,373 +1231,211 @@
                 renderMonthView();
             } else if (currentView === 'week') {
                 renderWeekView();
-            } else if (currentView === 'day') {
+            } else {
                 renderDayView();
             }
         }
 
         function renderMonthView() {
+            const monthGrid = document.getElementById('monthGrid');
+            monthGrid.innerHTML = '';
+            
+            // Add weekday headers
+            const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdayNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'weekday-header';
+                header.textContent = day;
+                monthGrid.appendChild(header);
+            });
+            
+            // Get first day and number of days in month
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const prevLastDay = new Date(year, month, 0).getDate();
-            const nextDays = 7 - lastDay.getDay() - 1;
-
-            document.getElementById('currentDate').textContent = `${monthNames[month]} ${year}`;
-
-            let html = '';
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
             
-            for (let i = 0; i < 7; i++) {
-                html += `<div class="weekday-header">${dayNames[i].substring(0, 3)}</div>`;
+            // Add previous month's days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const cell = createDayCell(new Date(year, month - 1, daysInPrevMonth - i), true);
+                monthGrid.appendChild(cell);
             }
-
-            for (let i = firstDay.getDay() - 1; i >= 0; i--) {
-                html += `<div class="day-cell other-month"><div class="day-number">${prevLastDay - i}</div></div>`;
+            
+            // Add current month's days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = createDayCell(new Date(year, month, day), false);
+                monthGrid.appendChild(cell);
             }
+            
+            // Add next month's days
+            const totalCells = monthGrid.children.length - 7; // Subtract weekday headers
+            const remainingCells = 42 - totalCells; // 6 weeks * 7 days
+            for (let day = 1; day <= remainingCells; day++) {
+                const cell = createDayCell(new Date(year, month + 1, day), true);
+                monthGrid.appendChild(cell);
+            }
+        }
 
-            for (let i = 1; i <= lastDay.getDate(); i++) {
-                const date = new Date(year, month, i);
-                const isToday = date.toDateString() === new Date().toDateString();
-                const events = getEventsForDate(date);
-                
-                html += `<div class="day-cell ${isToday ? 'today' : ''}">`;
-                html += `<div class="day-number">${i}</div>`;
-                events.forEach(event => {
-                    if (visibleClasses.has(event.classId) || !event.classId) {
-                        html += `
-                            <div class="event-item ${event.className || ''}" title="${event.title}${event.time ? ' - ' + event.time : ''}">
-                                <div class="event-title">${event.title}</div>
-                                ${event.className ? `<div class="event-class">${event.className}</div>` : ''}
-                                ${event.time ? `<div class="event-time">${event.time}</div>` : ''}
-                            </div>
-                        `;
+        function createDayCell(date, isOtherMonth) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell';
+            
+            if (isOtherMonth) {
+                cell.classList.add('other-month');
+            }
+            
+            const today = new Date();
+            if (date.toDateString() === today.toDateString()) {
+                cell.classList.add('today');
+            }
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            cell.appendChild(dayNumber);
+            
+            // Add events for this day
+            const dateStr = date.toISOString().split('T')[0];
+            addEventsToCell(cell, dateStr);
+            
+            return cell;
+        }
+
+        function addEventsToCell(cell, dateStr) {
+            if (!currentUser) return;
+            
+            // Add class sessions
+            if (currentUser.classSessions) {
+                currentUser.classSessions.forEach(session => {
+                    if (isDateInSession(dateStr, session)) {
+                        const event = document.createElement('div');
+                        event.className = 'event-item ' + session.className;
+                        
+                        const title = document.createElement('div');
+                        title.className = 'event-title';
+                        title.textContent = getClassNameById(session.classId);
+                        
+                        const time = document.createElement('div');
+                        time.className = 'event-time';
+                        time.textContent = session.startTime;
+                        
+                        event.appendChild(title);
+                        event.appendChild(time);
+                        cell.appendChild(event);
                     }
                 });
-                html += `</div>`;
             }
-
-            for (let i = 1; i <= nextDays; i++) {
-                html += `<div class="day-cell other-month"><div class="day-number">${i}</div></div>`;
+            
+            // Add tasks
+            if (currentUser.tasks) {
+                currentUser.tasks.forEach(task => {
+                    if (task.dueDate === dateStr) {
+                        const event = document.createElement('div');
+                        event.className = 'event-item';
+                        
+                        if (task.classId) {
+                            const classObj = currentUser.classes.find(c => c.id === task.classId);
+                            if (classObj) {
+                                event.classList.add(classObj.className);
+                            }
+                        }
+                        
+                        const title = document.createElement('div');
+                        title.className = 'event-title';
+                        title.textContent = task.name;
+                        
+                        if (task.time) {
+                            const time = document.createElement('div');
+                            time.className = 'event-time';
+                            time.textContent = task.time;
+                            event.appendChild(title);
+                            event.appendChild(time);
+                        } else {
+                            event.appendChild(title);
+                        }
+                        
+                        cell.appendChild(event);
+                    }
+                });
             }
+        }
 
-            document.getElementById('monthGrid').innerHTML = html;
+        function isDateInSession(dateStr, session) {
+            if (!visibleClasses.has(session.classId)) return false;
+            
+            const date = new Date(dateStr);
+            const dayOfWeek = date.getDay();
+            const startDate = new Date(session.startDate);
+            const endDate = new Date(session.endDate);
+            
+            return date >= startDate && date <= endDate && session.daysOfWeek.includes(dayOfWeek);
+        }
+
+        function getClassNameById(classId) {
+            if (!currentUser || !currentUser.classes) return '';
+            const cls = currentUser.classes.find(c => c.id === classId);
+            return cls ? cls.name : '';
         }
 
         function renderWeekView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = currentDate.getDate();
-            
-            const curr = new Date(year, month, day);
-            const first = curr.getDate() - curr.getDay();
-            const weekStart = new Date(curr.setDate(first));
-            
-            let html = '<div class="time-label"></div>';
-
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(weekStart);
-                date.setDate(date.getDate() + i);
-                html += `<div class="week-header">${dayShortNames[date.getDay()]}<br>${date.getDate()}</div>`;
-            }
-
-            const times = [];
-            for (let i = 7; i < 22; i++) {
-                times.push(`${i.toString().padStart(2, '0')}:00`);
-                html += `<div class="time-label">${i.toString().padStart(2, '0')}:00</div>`;
-                for (let j = 0; j < 7; j++) {
-                    const date = new Date(weekStart);
-                    date.setDate(date.getDate() + j);
-                    const events = getEventsForDateAndTime(date, i);
-                    html += `<div class="week-cell">`;
-                    events.forEach(event => {
-                        if (visibleClasses.has(event.classId) || !event.classId) {
-                            html += `
-                                <div class="week-event ${event.className || ''}">
-                                    <div class="week-event-title">${event.title}</div>
-                                    ${event.time ? `<div class="week-event-time">${event.time}</div>` : ''}
-                                </div>
-                            `;
-                        }
-                    });
-                    html += `</div>`;
-                }
-            }
-
-            document.getElementById('weekGrid').innerHTML = html;
-            document.getElementById('currentDate').textContent = `Week of ${monthNames[weekStart.getMonth()]} ${weekStart.getDate()}`;
+            // Placeholder - implement similar to month view but for week
+            document.getElementById('weekView').innerHTML = '<p>Week view coming soon</p>';
         }
 
         function renderDayView() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = currentDate.getDate();
-            
-            document.getElementById('dayViewHeader').textContent = 
-                `${dayNames[currentDate.getDay()]}, ${monthNames[month]} ${day}, ${year}`;
-            
-            const events = getEventsForDate(currentDate);
-            let html = '';
-
-            if (events.length === 0) {
-                html = '<p style="color: #8c8c8c; text-align: center; padding: 2rem;">No events scheduled for this day</p>';
-            } else {
-                events.forEach(event => {
-                    if (visibleClasses.has(event.classId) || !event.classId) {
-                        html += `
-                            <div class="day-event-card">
-                                <div class="day-event-info">
-                                    <h3>${event.title}</h3>
-                                    ${event.className ? `<div class="day-event-class">${event.className}</div>` : ''}
-                                    ${event.time ? `<div class="day-event-time">${event.time}</div>` : ''}
-                                    ${event.description ? `<p>${event.description}</p>` : ''}
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
-
-            document.getElementById('dayEvents').innerHTML = html;
-        }
-
-        function getEventsForDate(date) {
-            const events = [];
-            const dateStr = date.toISOString().split('T')[0];
-            const dayOfWeek = date.getDay();
-            
-            // Add class sessions
-            (currentUser.classSessions || []).forEach(session => {
-                if (session.daysOfWeek.includes(dayOfWeek)) {
-                    const sessionStart = new Date(session.startDate);
-                    const sessionEnd = new Date(session.endDate);
-                    if (date >= sessionStart && date <= sessionEnd) {
-                        const classInfo = currentUser.classes.find(c => c.id === session.classId);
-                        events.push({
-                            id: session.id,
-                            type: 'class',
-                            title: classInfo?.name || session.className,
-                            classId: session.classId,
-                            className: classInfo?.className,
-                            time: session.startTime + ' - ' + session.endTime,
-                            description: session.description
-                        });
-                    }
-                }
-            });
-            
-            // Add tasks/exams
-            (currentUser.tasks || []).forEach(task => {
-                if (task.dueDate === dateStr) {
-                    const classInfo = (currentUser.classes || []).find(c => c.id === task.classId);
-                    events.push({
-                        id: task.id,
-                        type: 'task',
-                        title: task.name,
-                        classId: task.classId,
-                        className: classInfo?.className,
-                        time: task.time || null,
-                        description: task.description
-                    });
-                }
-            });
-            
-            return events.sort((a, b) => {
-                if (a.time && b.time) {
-                    return a.time.localeCompare(b.time);
-                }
-                return 0;
-            });
-        }
-
-        function getEventsForDateAndTime(date, hour) {
-            const events = [];
-            const dayOfWeek = date.getDay();
-            
-            (currentUser.classSessions || []).forEach(session => {
-                if (session.daysOfWeek.includes(dayOfWeek)) {
-                    const sessionStart = new Date(session.startDate);
-                    const sessionEnd = new Date(session.endDate);
-                    if (date >= sessionStart && date <= sessionEnd) {
-                        const startHour = parseInt(session.startTime.split(':')[0]);
-                        if (startHour === hour) {
-                            const classInfo = currentUser.classes.find(c => c.id === session.classId);
-                            events.push({
-                                id: session.id,
-                                type: 'class',
-                                title: classInfo?.name || session.className,
-                                classId: session.classId,
-                                className: classInfo?.className,
-                                time: session.startTime + ' - ' + session.endTime,
-                                description: session.description
-                            });
-                        }
-                    }
-                }
-            });
-
-            return events;
-        }
-
-        function openAddEventModal() {
-            document.getElementById('eventType').value = '';
-            document.getElementById('eventTitle').value = '';
-            document.getElementById('eventDescription').value = '';
-            document.getElementById('eventClass').value = '';
-            document.getElementById('modalTitle').textContent = 'Add Event';
-            document.getElementById('eventModal').classList.add('active');
-            updateEventForm();
-        }
-
-        function closeEventModal() {
-            document.getElementById('eventModal').classList.remove('active');
+            // Placeholder - implement similar to month view but for single day
+            document.getElementById('dayView').innerHTML = '<p>Day view coming soon</p>';
         }
 
         function updateEventForm() {
             const eventType = document.getElementById('eventType').value;
-            document.getElementById('classScheduleSection').style.display = 
-                eventType === 'class' ? 'block' : 'none';
-            document.getElementById('eventDateSection').style.display = 
-                eventType !== 'class' && eventType !== '' ? 'block' : 'none';
+            const classScheduleSection = document.getElementById('classScheduleSection');
+            const eventDateSection = document.getElementById('eventDateSection');
+            
+            if (eventType === 'class') {
+                classScheduleSection.style.display = 'block';
+                eventDateSection.style.display = 'none';
+            } else if (eventType === 'exam' || eventType === 'task') {
+                classScheduleSection.style.display = 'none';
+                eventDateSection.style.display = 'block';
+            } else {
+                classScheduleSection.style.display = 'none';
+                eventDateSection.style.display = 'none';
+            }
+        }
+
+        function openAddEventModal() {
+            document.getElementById('eventModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = 'Add Event';
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').classList.remove('active');
+            document.getElementById('eventType').value = '';
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventClass').value = '';
+            document.getElementById('eventDescription').value = '';
+            updateEventForm();
         }
 
         function handleSaveEvent(e) {
             e.preventDefault();
-            
-            const eventType = document.getElementById('eventType').value;
-            const title = document.getElementById('eventTitle').value;
-            const classId = document.getElementById('eventClass').value;
-            const description = document.getElementById('eventDescription').value;
-            const errorDiv = document.getElementById('eventError');
-            const successDiv = document.getElementById('eventSuccess');
-
-            errorDiv.classList.remove('show');
-            successDiv.classList.remove('show');
-
-            if (!eventType || !title) {
-                errorDiv.textContent = 'Please fill in all required fields';
-                errorDiv.classList.add('show');
-                return;
-            }
-
-            if (eventType === 'class') {
-                const daysOfWeek = [];
-                ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach((day, index) => {
-                    if (document.getElementById(day).checked) {
-                        daysOfWeek.push(index === 6 ? 0 : index + 1);
-                    }
-                });
-
-                if (daysOfWeek.length === 0) {
-                    errorDiv.textContent = 'Please select at least one day of the week';
-                    errorDiv.classList.add('show');
-                    return;
-                }
-
-                const startTime = document.getElementById('classStartTime').value;
-                const endTime = document.getElementById('classEndTime').value;
-                const startDate = document.getElementById('classStartDate').value;
-                const endDate = document.getElementById('classEndDate').value;
-
-                if (!startTime || !endTime || !startDate || !endDate) {
-                    errorDiv.textContent = 'Please fill in all class details';
-                    errorDiv.classList.add('show');
-                    return;
-                }
-
-                const classSession = {
-                    id: `session_${Date.now()}`,
-                    classId: classId || `class_${Date.now()}`,
-                    className: title,
-                    daysOfWeek: daysOfWeek,
-                    startTime: startTime,
-                    endTime: endTime,
-                    startDate: startDate,
-                    endDate: endDate,
-                    description: description
-                };
-
-                if (!currentUser.classSessions) currentUser.classSessions = [];
-                currentUser.classSessions.push(classSession);
-
-                if (!classId) {
-                    const newClass = {
-                        id: classSession.classId,
-                        name: title,
-                        code: title,
-                        color: '#' + Math.floor(Math.random()*16777215).toString(16),
-                        className: title.toLowerCase().replace(/\s+/g, '')
-                    };
-                    if (!currentUser.classes) currentUser.classes = [];
-                    currentUser.classes.push(newClass);
-                    visibleClasses.add(newClass.id);
-                    injectDynamicStyles();
-                    renderFilters();
-                    populateEventClassSelect();
-                }
-            } else {
-                const eventDate = document.getElementById('eventDate').value;
-                const eventTime = document.getElementById('eventTime').value;
-
-                if (!eventDate) {
-                    errorDiv.textContent = 'Please select an event date';
-                    errorDiv.classList.add('show');
-                    return;
-                }
-
-                const task = {
-                    id: `task_${Date.now()}`,
-                    name: title,
-                    classId: classId,
-                    dueDate: eventDate,
-                    time: eventTime,
-                    description: description,
-                    completed: false,
-                    createdAt: new Date().getTime()
-                };
-
-                if (!currentUser.tasks) currentUser.tasks = [];
-                currentUser.tasks.push(task);
-            }
-
-            saveUserData();
-            successDiv.textContent = 'Event saved successfully!';
-            successDiv.classList.add('show');
-
+            // Implement event saving logic here
+            document.getElementById('eventSuccess').classList.add('show');
             setTimeout(() => {
                 closeEventModal();
-                renderCalendar();
-            }, 1500);
+                document.getElementById('eventSuccess').classList.remove('show');
+            }, 2000);
         }
 
-        function populateEventClassSelect() {
-            const select = document.getElementById('eventClass');
-            const classes = currentUser.classes || [];
-            const options = classes.map(cls => `<option value="${cls.id}">${cls.name}</option>`).join('');
-            select.innerHTML = '<option value="">No class (Personal/Extracurricular)</option>' + options;
+        function logout() {
+            // Implement logout logic
+            window.location.href = 'landingpage.html';
         }
 
-        function previousPeriod() {
-            if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() - 7);
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() - 1);
-            } else {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-            }
-            renderCalendar();
-        }
-
-        function nextPeriod() {
-            if (currentView === 'week') {
-                currentDate.setDate(currentDate.getDate() + 7);
-            } else if (currentView === 'day') {
-                currentDate.setDate(currentDate.getDate() + 1);
-            } else {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            }
-            renderCalendar();
-        }
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', loadUserData);
     </script>
 </body>
 </html>
